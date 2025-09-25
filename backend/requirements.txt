@@ -1,0 +1,32 @@
+# FastAPI Core
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# Database
+sqlalchemy==2.0.23
+psycopg2-binary==2.9.9
+alembic==1.13.1
+
+# Security Libraries
+requests==2.31.0
+beautifulsoup4==4.12.2
+python-nmap==0.7.1
+cryptography==41.0.8
+
+# Validation & Serialization
+pydantic==2.5.1
+pydantic-settings==2.1.0
+
+# Authentication
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# Environment
+python-dotenv==1.0.0
+
+# CORS
+python-multipart==0.0.6
+
+# Utils
+httpx==0.25.2
+aiofiles==23.2.1
