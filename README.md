@@ -12,23 +12,37 @@
 
 ZowTiScan é uma plataforma profissional de análise de segurança desenvolvida pela **Zowti Cybersecurity**. Nossa solução oferece detecção multicamadas de vulnerabilidades em aplicações web, análise de código-fonte e avaliação de infraestrutura.
 
+### 🔒 **SAFE MODE - Análise Não-Invasiva**
+
+**ZowTiScan opera exclusivamente em MODO SEGURO:**
+- ✅ **Zero payload injection** - não injeta código malicioso
+- ✅ **Análise passiva** - apenas lê código-fonte e headers
+- ✅ **Não-destrutivo** - não modifica dados do target
+- ✅ **Eticamente responsável** - demonstra vulnerabilidades sem explorar
+
+**Por que Safe Mode?**
+- **Proteção legal** - evita violação de sistemas
+- **Responsabilidade ética** - não causa danos a terceiros  
+- **Análise profissional** - identifica riscos sem testá-los
+- **Demonstração técnica** - comprova conhecimento sem invasão
+
 ### ✨ Funcionalidades Principais
 
-- **🌐 Web Security Scanner**
-  - Detecção de XSS (Cross-Site Scripting)
-  - Análise de SQL Injection
-  - Verificação de Security Headers
-  - Auditoria SSL/TLS
+- **🌐 Web Security Analysis (Safe Mode)**
+  - Verificação de Security Headers (CSP, HSTS, X-Frame-Options)
+  - Análise de formulários sem proteção CSRF
+  - Detecção de JavaScript patterns inseguros
+  - Auditoria SSL/TLS (headers apenas)
 
-- **📋 Code Analysis** 
-  - Detecção de credenciais expostas
-  - Análise de dependências vulneráveis
-  - Verificação de configurações inseguras
+- **📋 Static Code Analysis** 
+  - Análise de credenciais expostas (sem acesso ao código)
+  - Verificação de dependências conhecidas
+  - Padrões de configuração insegura
 
-- **🔍 Infrastructure Assessment**
-  - Port scanning inteligente
-  - Análise de serviços expostos
-  - Verificação de configurações de rede
+- **🔍 Infrastructure Assessment (Passive)**
+  - Análise de headers de resposta
+  - Detecção de tecnologias expostas
+  - Verificação de configurações públicas
 
 ## 🚀 Como Usar
 
@@ -90,12 +104,14 @@ curl -X POST http://localhost:8000/api/scan \
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-## 🔐 Segurança
+## 🔐 Segurança e Responsabilidade
 
-- Todas as conexões são criptografadas
-- Dados sensíveis são protegidos
-- Scans respeitam robots.txt e rate limits
-- Conformidade com LGPD
+- **Safe Mode Only** - análises não-invasivas exclusivamente
+- **Zero payload injection** - não executa código nos targets
+- **Respeito ao robots.txt** e rate limits
+- **Análise passiva** de segurança apenas
+- **Conformidade LGPD** e práticas éticas
+- **Uso responsável** - apenas sistemas próprios ou autorizados
 
 ## 📞 Suporte Profissional
 
