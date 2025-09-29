@@ -1,105 +1,97 @@
-# 🔒 ZowTiScan - Scanner Profissional de Segurança
+# 🔒 ZowTiScan - Professional Security Scanner
 
-Plataforma avançada de análise de segurança que detecta vulnerabilidades em aplicações web através de análise inteligente de código-fonte, headers e configurações. O sistema opera em Safe Mode, realizando verificações profissionais sem comprometer a integridade dos sistemas analisados.
+Clean, fast, and effective web security scanner with 14 detection modules.
 
-🌐 **Demo em breve:** Em desenvolvimento - Plataforma enterprise com análises em tempo real!
+## Features
 
----
+- **14 Security Modules**: XSS, CSRF, SQL Injection, NoSQL Injection, Headers, Broken Pages/Links, Info Disclosure, Authentication, Access Control, File Upload
+- **Fast Scanning**: Complete analysis in ~1 second
+- **Safe Mode**: No payloads injected, passive analysis only
+- **Professional Reports**: JSON and text output formats
+- **Real TDD**: Comprehensive pytest test suite
 
-## 🚀 Funcionalidades
+## Installation
 
-### 🛡️ Análise de Segurança Web
-- **Detecção de vulnerabilidades XSS** via análise de código
-- **Verificação de Security Headers** (CSP, HSTS, X-Frame-Options)
-- **Análise de proteção CSRF** em formulários
-- **Auditoria SSL/TLS** através de headers
-
-### 📊 Análise de Código JavaScript  
-- **Detecção de padrões inseguros** (eval, innerHTML, document.write)
-- **Identificação de sinks vulneráveis** a injeções
-- **Análise de manipulação DOM** perigosa
-- **Verificação de validação client-side**
-
-### 🎯 Análise Demonstrativa
-- **Safe Mode** - Zero payload injection
-- **Análise passiva** de configurações de segurança
-- **Relatórios detalhados** com score de segurança
-- **Múltiplos tipos** de verificação
-
----
-
-## 🛠️ Stack Tecnológico
-
-- **Backend:** Python + FastAPI
-- **Frontend:** Next.js + React  
-- **Database:** PostgreSQL
-- **Security:** Safe Mode Analysis Engine
-- **Deploy:** Enterprise Cloud Infrastructure
-
----
-
-## 📦 Estrutura
-
-```
-ZowTiScan/
-├── backend/                 # FastAPI security engine
-├── frontend/                # Next.js dashboard  
-├── shared/                  # Tipos e constantes
-├── docs/                    # Documentação técnica
-└── deploy/                  # Scripts de deployment
+```bash
+pip install -r requirements.txt
 ```
 
+## Usage
+
+### Command Line
+```bash
+# Scan all modules
+python scanner.py https://example.com
+
+# Scan specific modules
+python scanner.py https://example.com --modules xss csrf injection nosql_injection headers
+
+# JSON output
+python scanner.py https://example.com --format json
+```
+
+### As Library
+```python
+from scanner import SecurityScanner
+
+scanner = SecurityScanner()
+vulnerabilities = scanner.scan_url('https://example.com')
+report = scanner.generate_report('https://example.com', vulnerabilities)
+```
+
+## Example Output
+
+```
+ZowTiScan - Scanning https://example.com
+============================================================
+Security Score: 45/100 (HIGH RISK)
+Vulnerabilities found: 8 issues
+Scan duration: 1.13 seconds
+
+CRITICAL/HIGH:
+1. Missing CSRF Protection - POST form without CSRF protection detected
+2. SQL Injection Risk - Form with potentially vulnerable parameters: user_id, post_id
+
+MEDIUM:
+3. Missing Content-Security-Policy - Script injection risk
+4. Missing X-Frame-Options - Clickjacking risk
+5. Missing HSTS Header - HTTPS downgrade attacks
+
+LOW:
+6. Potential XSS Input - Input 'comment' might be vulnerable to XSS
+7. Source Code in Response - Response contains Function definition
+8. Potentially Unsafe JavaScript - JavaScript inline com innerHTML assignment
+```
+
+## Testing
+
+```bash
+# Run all tests
+pytest tests/ -v
+
+# Run specific test
+pytest tests/test_scanner.py::TestSecurityScanner::test_xss_detection -v
+```
+
+## Modules
+
+| Module | Description | Detects |
+|--------|-------------|---------|
+| **XSS** | Cross-Site Scripting | Unsafe inputs, innerHTML usage |
+| **CSRF** | Cross-Site Request Forgery | Missing CSRF tokens |
+| **SQL Injection** | SQL Database Attacks | Suspicious SQL parameters |
+| **NoSQL Injection** | NoSQL Database Attacks | MongoDB, Redis vulnerabilities |
+| **Headers** | Security Headers | Missing CSP, HSTS, X-Frame-Options |
+| **Broken Pages** | Link Validation | 404s, inactive elements |
+| **Info Disclosure** | Information Leaks | Error messages, debug info |
+| **Authentication** | Auth Security | Weak password policies |
+| **Access Control** | Authorization | Directory listing |
+| **File Upload** | Upload Security | Unrestricted uploads |
+
+## License
+
+MIT License - Professional security scanner for educational and authorized testing only.
+
 ---
 
-## 📊 Demonstração
-
-### Scanner em Ação
-- **Análise de Headers** - Verificação automática de segurança
-- **Detecção XSS** - Identificação de vulnerabilidades via código
-- **CSRF Analysis** - Verificação de proteções em formulários
-- **JavaScript Audit** - Análise de padrões inseguros
-
-### Relatórios Inteligentes
-Acesse nossa plataforma para visualizar:
-- Score de segurança detalhado
-- Vulnerabilidades categorizadas por severidade
-- Recomendações específicas de correção
-- Timeline de análises realizadas
-
----
-
-## 📱 Compatibilidade
-
-✅ Análise de sites responsivos  
-✅ Aplicações Single Page (SPA)  
-✅ Sites tradicionais HTML/JS  
-✅ Plataformas enterprise
-
----
-
-## 💡 Quer Implementar Análises de Segurança Avançadas?
-
-Esta é apenas uma demonstração das capacidades do sistema. Para conhecer a implementação completa e adaptar para sua empresa:
-
-📧 **Entre em contato:** contato@diegofontedev.com.br
-
----
-
-## 👨‍💻 Desenvolvido por
-
-**Diego Fonte**  
-*Full Stack Developer & Cybersecurity/AI Consultant*
-
-🌐 **Website:** [diegofontedev.com.br](https://diegofontedev.com.br) | [English](https://diegofontedev.com.br/en) | [Español](https://diegofontedev.com.br/es)  
-🏢 **Empresa:** [zowti.com](https://zowti.com) | [English](https://zowti.com/en) | [Español](https://zowti.com/es)  
-📧 **Contato:** contato@diegofontedev.com.br
-
----
-
-## 📄 Licença
-
-Este projeto é um portfólio demonstrativo desenvolvido por Diego Fonte.
-
----
-
-⭐ Se este projeto despertou seu interesse, entre em contato para conhecer a implementação completa!
+**Use only on websites you own or have explicit permission to test.**

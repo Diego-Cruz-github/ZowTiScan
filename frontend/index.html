@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZowTiScan - Enterprise Security Scanner</title>
+    <link href="style.css" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-text">
+                        <h1>ZowTiScan</h1>
+                        <span class="tagline">Enterprise Security Scanner</span>
+                    </div>
+                    <div class="made-by">
+                        <span class="made-by-text">made by</span>
+                        <div class="zowti-link">
+                            <a href="https://www.zowti.com/" target="_blank" class="zowti-main">ZOWTI</a>
+                            <div class="language-options">
+                                <a href="https://www.zowti.com/" target="_blank" title="Português">PT</a>
+                                <a href="https://www.zowti.com/en/index.html" target="_blank" title="English">EN</a>
+                                <a href="https://www.zowti.com/es/index.html" target="_blank" title="Español">ES</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <section class="hero-section">
+                <div class="hero-content">
+                    <h1 class="hero-title">Professional Web Security Assessment</h1>
+                    <p class="hero-description">Advanced vulnerability scanning and security analysis for enterprise applications</p>
+                </div>
+            </section>
+
+            <section class="scanner-section">
+                <div class="scanner-container">
+                    <div class="scanner-header">
+                        <h2>Security Scanner</h2>
+                        <p>Enter a domain to begin comprehensive security analysis</p>
+                    </div>
+                    
+                    <div class="scanner-form">
+                        <div class="input-group">
+                            <input type="text" id="urlInput" placeholder="example.com" class="url-input" autocomplete="off">
+                            <button onclick="scanUrl()" class="scan-btn">
+                                <span class="button-text">Escanear</span>
+                                <div class="loading-spinner" style="display: none;"></div>
+                            </button>
+                        </div>
+                        
+                        <div class="scan-info">
+                            <span class="info-text">Automated detection of HTTP/HTTPS protocols</span>
+                        </div>
+                        
+                        <div id="scanStatus" class="scan-status" style="display: none;"></div>
+                        
+                        <div class="modules-grid">
+                            <div class="module-group">
+                                <h3>Vulnerability Detection</h3>
+                                <div class="module-items">
+                                    <label class="module-item">
+                                        <input type="checkbox" checked>
+                                        <span>XSS Detection</span>
+                                    </label>
+                                    <label class="module-item">
+                                        <input type="checkbox" checked>
+                                        <span>SQL Injection</span>
+                                    </label>
+                                    <label class="module-item">
+                                        <input type="checkbox" checked>
+                                        <span>NoSQL Injection</span>
+                                    </label>
+                                    <label class="module-item">
+                                        <input type="checkbox" checked>
+                                        <span>CSRF Protection</span>
+                                    </label>
+                                    <label class="module-item">
+                                        <input type="checkbox" checked>
+                                        <span>JavaScript Errors</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="module-group">
+                                <h3>Security Configuration</h3>
+                                <div class="module-items">
+                                    <label class="module-item">
+                                        <input type="checkbox" checked>
+                                        <span>Security Headers</span>
+                                    </label>
+                                    <label class="module-item">
+                                        <input type="checkbox" checked>
+                                        <span>HTTPS Protocol</span>
+                                    </label>
+                                    <label class="module-item">
+                                        <input type="checkbox" checked>
+                                        <span>HTTP→HTTPS Redirect</span>
+                                    </label>
+                                    <label class="module-item">
+                                        <input type="checkbox" checked>
+                                        <span>Authentication</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="module-group">
+                                <h3>Infrastructure Security</h3>
+                                <div class="module-items">
+                                    <label class="module-item">
+                                        <input type="checkbox" checked>
+                                        <span>Access Control</span>
+                                    </label>
+                                    <label class="module-item">
+                                        <input type="checkbox" checked>
+                                        <span>File Upload Security</span>
+                                    </label>
+                                    <label class="module-item">
+                                        <input type="checkbox" checked>
+                                        <span>Meta Viewport</span>
+                                    </label>
+                                    <label class="module-item">
+                                        <input type="checkbox" checked>
+                                        <span>Info Disclosure</span>
+                                    </label>
+                                    <label class="module-item">
+                                        <input type="checkbox" checked>
+                                        <span>Broken Pages/Links</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="scanResults" class="scan-results" style="display: none;">
+                        <div class="results-header">
+                            <h3 id="resultTitle">Security Analysis Results</h3>
+                            <div class="results-actions">
+                                <div class="security-score" id="securityScore">
+                                    <span class="score-number">0</span>
+                                    <span class="score-label">/100</span>
+                                </div>
+                                <button onclick="generatePDFReport()" class="pdf-btn">
+                                    📄 Generate PDF Report
+                                </button>
+                            </div>
+                        </div>
+                        <div id="vulnerabilityList" class="vulnerability-list"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Report Modal -->
+    <div id="reportModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Detailed Report</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="modalContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>ZowTiScan</h3>
+                    <p>Enterprise-grade security scanner for comprehensive vulnerability assessment</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Capabilities</h3>
+                    <ul>
+                        <li>• 14 Security Modules</li>
+                        <li>• Professional Reports</li>
+                        <li>• Real-time Analysis</li>
+                        <li>• Detailed Assessment</li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <p>For authorized professional use only</p>
+                    <p>Built with Python & Advanced Testing</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 ZowTiScan. Professional Security Analysis Tool.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
