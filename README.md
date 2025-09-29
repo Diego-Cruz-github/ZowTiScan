@@ -7,7 +7,6 @@ Clean, fast, and effective web security scanner with 14 detection modules.
 - **14 Security Modules**: XSS, CSRF, SQL Injection, NoSQL Injection, Headers, Broken Pages/Links, Info Disclosure, Authentication, Access Control, File Upload
 - **REST API**: Complete programmatic access via JSON endpoints
 - **Professional Reports**: Detailed PDF, JSON and formatted text reports
-- **Fast Scanning**: Complete analysis in ~1 second
 - **Safe Mode**: No payloads injected, passive analysis only
 - **Real TDD**: Comprehensive pytest test suite
 - **Debug Support**: Development PIN available for troubleshooting
