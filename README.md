@@ -2,12 +2,6 @@
 
 Clean, fast, and effective web security scanner with 14 detection modules.
 
-## 📸 Demonstração
-
-![ZowTiScan Demo](Demonstração/Gravando-2025-09-29-115632.gif)
-
-*Professional web security scanning in action - Real-time vulnerability detection with detailed reporting*
-
 ## Features
 
 - **14 Security Modules**: XSS, CSRF, SQL Injection, NoSQL Injection, Headers, Broken Pages/Links, Info Disclosure, Authentication, Access Control, File Upload
@@ -17,6 +11,12 @@ Clean, fast, and effective web security scanner with 14 detection modules.
 - **Safe Mode**: No payloads injected, passive analysis only
 - **Real TDD**: Comprehensive pytest test suite
 - **Debug Support**: Development PIN available for troubleshooting
+
+## 📸 Demonstração
+
+![ZowTiScan Demo](Demonstração/Gravando-2025-09-29-115632.gif)
+
+*Professional web security scanning in action - Real-time vulnerability detection with detailed reporting*
 
 ## Installation
 
