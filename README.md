@@ -2,13 +2,21 @@
 
 Clean, fast, and effective web security scanner with 14 detection modules.
 
+## 📸 Demonstração
+
+![ZowTiScan Demo](Demonstração/Gravando-2025-09-29-115632.gif)
+
+*Professional web security scanning in action - Real-time vulnerability detection with detailed reporting*
+
 ## Features
 
 - **14 Security Modules**: XSS, CSRF, SQL Injection, NoSQL Injection, Headers, Broken Pages/Links, Info Disclosure, Authentication, Access Control, File Upload
+- **REST API**: Complete programmatic access via JSON endpoints
+- **Professional Reports**: Detailed PDF, JSON and formatted text reports
 - **Fast Scanning**: Complete analysis in ~1 second
 - **Safe Mode**: No payloads injected, passive analysis only
-- **Professional Reports**: JSON and text output formats
 - **Real TDD**: Comprehensive pytest test suite
+- **Debug Support**: Development PIN available for troubleshooting
 
 ## Installation
 
@@ -37,6 +45,28 @@ from scanner import SecurityScanner
 scanner = SecurityScanner()
 vulnerabilities = scanner.scan_url('https://example.com')
 report = scanner.generate_report('https://example.com', vulnerabilities)
+```
+
+### REST API Integration
+```bash
+# Start the web server
+python app.py
+
+# API endpoint available at:
+POST http://localhost:5000/api/scan
+Content-Type: application/json
+
+{"url": "https://example.com"}
+```
+
+```python
+# Python API integration
+import requests
+
+response = requests.post('http://localhost:5000/api/scan', 
+                        json={'url': 'https://example.com'})
+result = response.json()
+print(f"Security Score: {result['security_score']}/100")
 ```
 
 ## Example Output
@@ -87,6 +117,17 @@ pytest tests/test_scanner.py::TestSecurityScanner::test_xss_detection -v
 | **Authentication** | Auth Security | Weak password policies |
 | **Access Control** | Authorization | Directory listing |
 | **File Upload** | Upload Security | Unrestricted uploads |
+
+## Development & Support
+
+### Debug Mode
+When running in development mode (`python app.py`), debug PIN is displayed in console for troubleshooting. If you encounter issues, please include the debug information when reaching out for support.
+
+### Report Generation
+The scanner automatically generates multiple report formats:
+- **PDF Reports**: Professional formatted security assessments
+- **JSON Data**: Structured data for integrations
+- **Text Reports**: Human-readable analysis with professional insights
 
 ## License
 
