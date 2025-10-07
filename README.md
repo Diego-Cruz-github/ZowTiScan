@@ -167,5 +167,10 @@ MIT License - Scanner profissional para uso educacional e testes autorizados.
 
 ---
 
-**Desenvolvido por**: [Diego Fonte](https://diegofontedev.com.br) - Desenvolvedor Full Stack, Consultor em IA e Cibersegurança  
-**Parceria**: [ZowTi](https://www.zowti.com)
+## 👨‍💻 Autor
+**Diego Fonte** - Desenvolvedor Full Stack | Consultor de Cyber Segurança e IA
+
+🌐 **Website**: [www.diegofontedev.com.br](https://www.diegofontedev.com.br) | [English](https://www.diegofontedev.com.br/index-en.html) | [Español](https://www.diegofontedev.com.br/index-es.html)  
+📧 **Email**: contato@diegofontedev.com.br
+
+🤝 **Em Parceria com**: [ZowTi](https://www.zowti.com) | [English](https://www.zowti.com/en/index.html) | [Español](https://www.zowti.com/es/index.html)
