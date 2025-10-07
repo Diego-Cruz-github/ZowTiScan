@@ -1,1018 +1,1477 @@
-// ZowTiScan Professional Frontend JavaScript
-// SAFE MODE ONLY - NO PAYLOAD INJECTION
+/**
+ * ZowTiCheck Professional Frontend
+ * Real-time Security + Performance + SEO Audit Interface
+ * Integrates with Flask Backend APIs
+ */
 
-class ZowTiScanUI {
+class ZowTiCheckUI {
     constructor() {
+        this.baseURL = 'http://localhost:5000';
         this.isScanning = false;
-        this.reports = {
-            zowti: {
-                title: "Análise Completa de: https://www.zowti.com",
-                score: 85,
-                risk: "MÉDIO",
-                vulnerabilities: 2,
-                duration: 0.45,
-                details: `
-  - Security Score: 85/100 ✅ (Médio)
-  - Vulnerabilidades encontradas: 2 issues
-  - Scan duration: 0.45 segundos
-  - Status: Site com excelente configuração de segurança
+        this.currentScanType = 'full';
+        this.currentResults = null;
+        
+        // Initialize UI components
+        this.initializeElements();
+        this.initializeEventListeners();
+        this.initializeAnimations();
+        
+        console.log('🛡️ ZowTiCheck UI initialized - Ready for security audits');
+    }
 
-  🔍 Vulnerabilidades Detectadas:
+    initializeElements() {
+        // Input elements
+        this.urlInput = document.getElementById('urlInput');
+        this.detectBtn = document.getElementById('detectBtn');
+        this.scanBtn = document.getElementById('scanBtn');
+        this.exportBtn = document.getElementById('exportBtn');
+        this.pdfSummaryBtn = document.getElementById('pdfSummaryBtn');
+        this.pdfDetailedBtn = document.getElementById('pdfDetailedBtn');
+        
+        // Display elements
+        this.protocolDisplay = document.getElementById('protocolDisplay');
+        this.resultsContent = document.getElementById('resultsContent');
+        this.loadingOverlay = document.getElementById('loadingOverlay');
+        this.loadingStatus = document.getElementById('loadingStatus');
+        this.progressBar = document.getElementById('progressBar');
+        
+        // Buttons
+        this.scanTypeButtons = document.querySelectorAll('.scan-type-btn');
+    }
 
-  ⚠️ MÉDIAS/MEDIUM:
-  1. Missing X-XSS-Protection - XSS protection
-
-  ℹ️ BAIXAS/LOW:
-  2. Response contains Function definition
-
-   💡 Insights Profissionais:
-  - Excelente configuração geral de segurança
-  - Apenas pequenos ajustes necessários
-  - Exemplo de boa implementação de segurança web`
-            },
-            candiottovalle: {
-                title: "Análise Completa de: https://www.candiottovalle.com.br",
-                score: 0,
-                risk: "CRÍTICO",
-                vulnerabilities: 16,
-                duration: 1.83,
-                details: `
-  - Security Score: 0/100 ⚠️ (Crítico)
-  - Vulnerabilidades encontradas: 16 issues reais
-  - Scan duration: 1.83 segundos
-  - Status: Site com múltiplas vulnerabilidades de segurança
-
-  🔍 Vulnerabilidades Detectadas:
-
-  🚨 CRÍTICAS/HIGH:
-  1. POST form without CSRF protection detected (High)
-  2. Form with potentially vulnerable parameters: post_id, form_id, queried_id (High)  
-  3. Missing Content-Security-Policy - Script injection risk (High)
-
-  ⚠️ MÉDIAS/MEDIUM:
-  4. Input 'form_fields[name]' might be vulnerable to XSS without proper output encoding
-  5. Input 'form_fields[email]' might be vulnerable to XSS without proper output encoding
-  6. Input 'form_fields[message]' might be vulnerable to XSS without proper output encoding
-  7. Missing X-Frame-Options - Clickjacking risk
-  8. Missing X-Content-Type-Options - MIME sniffing
-  9. Missing X-XSS-Protection - XSS protection
-  10. Missing HSTS Header - HTTPS downgrade attacks
-
-  ℹ️ BAIXAS/LOW:
-  11. JavaScript inline com innerHTML assignment
-  12. Response contains Function definition
-  13. JavaScript contains redirect functionality that might be exploitable
-
-   💡 Insights Profissionais:
-  - Múltiplos formulários vulneráveis a CSRF
-  - Headers de segurança não configurados
-  - Campos de entrada sem validação adequada
-  - Código JavaScript exposto com práticas inseguras
-  - Parâmetros suspeitos detectados em formulários
-  - Site requer atenção imediata de segurança`
-            },
-            hhsolucoes: {
-                title: "Análise Completa de: https://hhsolucoes.net",
-                score: 20,
-                risk: "CRÍTICO", 
-                vulnerabilities: 8,
-                duration: 1.11,
-                details: `
-  - Security Score: 20/100 ⚠️ (Crítico)
-  - Vulnerabilidades encontradas: 8 issues reais
-  - Scan duration: 1.11 segundos
-  - Status: Site com múltiplas vulnerabilidades de segurança
-
-  🔍 Vulnerabilidades Detectadas:
-
-  🚨 CRÍTICAS/HIGH:
-  1. Missing Content-Security-Policy - Script injection risk (High)
-
-  ⚠️ MÉDIAS/MEDIUM:
-  2. Missing X-Frame-Options - Clickjacking risk
-  3. Missing X-Content-Type-Options - MIME sniffing
-  4. Missing X-XSS-Protection - XSS protection
-  5. Missing HSTS Header - HTTPS downgrade attacks
-  6. HTTPS site without HTTP Strict Transport Security
-
-  ℹ️ BAIXAS/LOW:
-  7. JavaScript inline com innerHTML assignment
-  8. Response contains Function definition
-
-   💡 Insights Profissionais:
-  - Headers de segurança não configurados
-  - Código JavaScript exposto com práticas inseguras
-  - Implementar correções de segurança recomendadas`
-            },
-            juridigital: {
-                title: "Análise Completa de: http://juridigital.com.br",
-                score: 35,
-                risk: "CRÍTICO",
-                vulnerabilities: 6,
-                duration: 1.03,
-                details: `
-  - Security Score: 35/100 ⚠️ (Crítico)
-  - Vulnerabilidades encontradas: 6 issues reais
-  - Scan duration: 1.03 segundos
-  - Status: Site com múltiplas vulnerabilidades de segurança
-
-  🔍 Vulnerabilidades Detectadas:
-
-  🚨 CRÍTICAS/HIGH:
-  1. Missing Content-Security-Policy - Script injection risk (High)
-
-  ⚠️ MÉDIAS/MEDIUM:
-  2. Missing X-Frame-Options - Clickjacking risk
-  3. Missing X-Content-Type-Options - MIME sniffing
-  4. Missing X-XSS-Protection - XSS protection
-  5. Missing HSTS Header - HTTPS downgrade attacks
-
-  ℹ️ BAIXAS/LOW:
-  6. Response contains Error message
-
-   💡 Insights Profissionais:
-  - Headers de segurança não configurados
-  - Implementar correções de segurança recomendadas`
-            },
-            mcsarc: {
-                title: "Análise Completa de: https://www.mcsarc.com.br",
-                score: 100,
-                risk: "BAIXO",
-                vulnerabilities: 0,
-                duration: 0.28,
-                details: `
-  - Security Score: 100/100 ✅ (Bom)
-  - Vulnerabilidades encontradas: 0 issues
-  - Scan duration: 0.28 segundos
-  - Status: Site com boa configuração de segurança
-
-  🔍 Análise de Segurança:
-
-  ✅ CONFIGURAÇÃO SEGURA:
-  - Todos os headers de segurança configurados adequadamente
-  - Não foram detectadas vulnerabilidades críticas
-  - Site apresenta práticas de segurança adequadas
-
-   💡 Insights Profissionais:
-  - Site bem configurado com práticas de segurança adequadas
-  - Exemplo de implementação segura para outros sites`
+    initializeEventListeners() {
+        // URL input and detection
+        this.urlInput.addEventListener('input', () => this.validateURL());
+        this.detectBtn.addEventListener('click', () => this.detectProtocol());
+        
+        // Scan type selection
+        this.scanTypeButtons.forEach(btn => {
+            btn.addEventListener('click', () => this.selectScanType(btn.dataset.mode));
+        });
+        
+        // Main scan button
+        this.scanBtn.addEventListener('click', () => this.startScan());
+        
+        
+        // Export functionality
+        this.exportBtn.addEventListener('click', () => this.exportResults());
+        
+        // Enter key support
+        this.urlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !this.isScanning) {
+                this.startScan();
             }
+        });
+    }
+
+    initializeAnimations() {
+        // Add cyber glow effect to active elements
+        const glowElements = document.querySelectorAll('.scan-btn, .feature-badge');
+        glowElements.forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                el.classList.add('pulse-glow');
+            });
+            el.addEventListener('mouseleave', () => {
+                el.classList.remove('pulse-glow');
+            });
+        });
+    }
+
+    validateURL() {
+        const url = this.urlInput.value.trim();
+        const isValid = url.length > 0 && (url.includes('.') || url.includes('localhost'));
+        
+        this.scanBtn.disabled = !isValid || this.isScanning;
+        
+        if (url.length > 0 && !isValid) {
+            this.protocolDisplay.textContent = '⚠️ Enter a valid domain or URL';
+            this.protocolDisplay.className = 'protocol-display error';
+        } else {
+            this.protocolDisplay.textContent = '';
+            this.protocolDisplay.className = 'protocol-display';
+        }
+    }
+
+    async detectProtocol() {
+        const url = this.urlInput.value.trim();
+        if (!url) return;
+
+        this.detectBtn.disabled = true;
+        this.protocolDisplay.textContent = '🔍 Detecting optimal protocol...';
+        this.protocolDisplay.className = 'protocol-display';
+
+        try {
+            const response = await fetch(`${this.baseURL}/api/smart-detect`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ domain: url })
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                this.protocolDisplay.textContent = `✅ Protocol: ${data.protocol.toUpperCase()} | Final URL: ${data.finalUrl}`;
+                this.protocolDisplay.className = 'protocol-display success';
+                this.urlInput.value = data.finalUrl;
+            } else {
+                this.protocolDisplay.textContent = `❌ ${data.error}`;
+                this.protocolDisplay.className = 'protocol-display error';
+            }
+        } catch (error) {
+            this.protocolDisplay.textContent = `❌ Detection failed: ${error.message}`;
+            this.protocolDisplay.className = 'protocol-display error';
+        } finally {
+            this.detectBtn.disabled = false;
+        }
+    }
+
+    async autoDetectSilent(url) {
+        // Auto-detect protocol silently without UI updates
+        try {
+            const response = await fetch(`${this.baseURL}/api/smart-detect`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ domain: url })
+            });
+
+            const data = await response.json();
+            
+            if (data.success) {
+                return data.finalUrl;
+            } else {
+                // If auto-detect fails, return original URL
+                return url;
+            }
+        } catch (error) {
+            // If auto-detect fails, return original URL
+            return url;
+        }
+    }
+
+    selectScanType(mode) {
+        this.currentScanType = mode;
+        
+        // Update UI state
+        this.scanTypeButtons.forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        const activeBtn = document.querySelector(`[data-mode=\"${mode}\"]`);
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+        }
+        
+        // Update scan button text
+        const modeTexts = {
+            security: '🛡️ Start Security Scan',
+            performance: '🚀 Start Performance Analysis', 
+            seo: '🎯 Start SEO Analysis',
+            'web-patterns': '🔧 Start Web Patterns Analysis',
+            full: '⭐ Start Complete Audit'
         };
         
-        this.comparatives = {
-            dupla1: `📊 ANÁLISE COMPARATIVA - ZowTiScan
-================================================
+        const scanTextElement = this.scanBtn.querySelector('.scan-text');
+        if (scanTextElement) {
+            scanTextElement.textContent = modeTexts[mode] || 'Start Scan';
+        }
+        
+        console.log(`🎯 Scan type selected: ${mode}`);
+    }
 
-🔗 Site 1: http://juridigital.com.br
-   Score: 35/100 | Vulnerabilidades: 6
+    async startScan() {
+        const url = this.urlInput.value.trim();
+        if (!url || this.isScanning) return;
 
-🔗 Site 2: https://hhsolucoes.net 
-   Score: 20/100 | Vulnerabilidades: 8
+        this.isScanning = true;
+        this.showLoadingOverlay();
+        this.updateScanButton(true);
+        
+        try {
+            // AUTOMATIC PROTOCOL DETECTION - Always execute before any scan
+            this.updateLoadingStatus('🔍 Auto-detecting optimal protocol...', 5);
+            const detectedUrl = await this.autoDetectSilent(url);
+            
+            // Update URL input with detected URL silently
+            this.urlInput.value = detectedUrl;
+            
+            // Update protocol display
+            const protocol = detectedUrl.startsWith('https://') ? 'HTTPS' : 'HTTP';
+            this.protocolDisplay.textContent = `✅ Auto-detected: ${protocol} | ${detectedUrl}`;
+            this.protocolDisplay.className = 'protocol-display success';
+            
+            let results;
+            
+            // Route to appropriate API based on scan type
+            switch (this.currentScanType) {
+                case 'security':
+                    results = await this.performSecurityScan(detectedUrl);
+                    break;
+                case 'performance':
+                    results = await this.performPerformanceScan(detectedUrl);
+                    break;
+                case 'seo':
+                    results = await this.performSEOScan(detectedUrl);
+                    break;
+                case 'web-patterns':
+                    results = await this.performWebPatternsScan(detectedUrl);
+                    break;
+                case 'full':
+                    results = await this.performFullAudit(detectedUrl);
+                    break;
+            }
+            
+            this.currentResults = results;
+            this.displayResults(results);
+            this.exportBtn.disabled = false;
+            this.pdfSummaryBtn.disabled = false;
+            this.pdfDetailedBtn.disabled = false;
+            
+        } catch (error) {
+            console.error('Scan error:', error);
+            this.displayError(error.message || 'Unknown error occurred during scan');
+        } finally {
+            this.isScanning = false;
+            this.hideLoadingOverlay();
+            this.updateScanButton(false);
+        }
+    }
 
-📈 COMPARAÇÃO DE SEGURANÇA:
-✅ juridigital.com.br está 15 pontos mais seguro
+    async performSecurityScan(url) {
+        this.updateLoadingStatus('Initializing security modules...', 10);
+        
+        const response = await fetch(`${this.baseURL}/api/scan`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url: url })
+        });
 
-🚨 VULNERABILIDADES CRÍTICAS:
-   juridigital.com.br: 1 issues
-   hhsolucoes.net: 1 issues
+        if (!response.ok) {
+            throw new Error(`Security scan failed: ${response.status}`);
+        }
 
-⚠️ VULNERABILIDADES MÉDIAS:
-   juridigital.com.br: 4 issues
-   hhsolucoes.net: 5 issues
+        this.updateLoadingStatus('Analyzing vulnerabilities...', 60);
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.message || 'Security scan failed');
+        }
 
-💡 RECOMENDAÇÃO:
-   Ambos os sites necessitam atenção imediata de segurança`,
-   
-            dupla2: `📊 ANÁLISE COMPARATIVA - ZowTiScan  
-================================================
-
-🔗 Site 1: https://www.mcsarc.com.br
-   Score: 100/100 | Vulnerabilidades: 0
-
-🔗 Site 2: https://www.candiottovalle.com.br
-   Score: 0/100 | Vulnerabilidades: 16
-
-📈 COMPARAÇÃO DE SEGURANÇA:
-✅ mcsarc.com.br está 100 pontos mais seguro
-
-🚨 VULNERABILIDADES CRÍTICAS:
-   mcsarc.com.br: 0 issues
-   candiottovalle.com.br: 3 issues
-
-⚠️ VULNERABILIDADES MÉDIAS:
-   mcsarc.com.br: 0 issues
-   candiottovalle.com.br: 10 issues
-
-💡 RECOMENDAÇÃO:
-   Usar mcsarc.com.br como referência para melhorias`
+        this.updateLoadingStatus('Generating security report...', 90);
+        return {
+            type: 'security',
+            data: data
         };
     }
 
-    // REAL BACKEND SCAN WITH FLASK API
-    async scanUrl() {
-        const urlInput = document.getElementById('urlInput');
-        const url = urlInput.value.trim();
+    async performPerformanceScan(url) {
+        this.updateLoadingStatus('Connecting to PageSpeed API...', 20);
         
-        if (!url) {
-            this.showAlert('Por favor, insira um domínio (ex: google.com)');
+        const response = await fetch(`${this.baseURL}/api/performance`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url: url })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Performance scan failed: ${response.status}`);
+        }
+
+        this.updateLoadingStatus('Analyzing Core Web Vitals...', 70);
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.error || 'Performance scan failed');
+        }
+
+        this.updateLoadingStatus('Generating performance report...', 95);
+        return {
+            type: 'performance',
+            data: data
+        };
+    }
+
+    async performSEOScan(url) {
+        this.updateLoadingStatus('Connecting to PageSpeed SEO API...', 20);
+        
+        // Use dedicated SEO API for dual mobile + desktop analysis
+        const response = await fetch(`${this.baseURL}/api/seo`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url: url })
+        });
+
+        if (!response.ok) {
+            throw new Error(`SEO scan failed: ${response.status}`);
+        }
+
+        this.updateLoadingStatus('Analyzing mobile + desktop SEO factors...', 70);
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.error || 'SEO scan failed');
+        }
+
+        this.updateLoadingStatus('Generating dual SEO report...', 95);
+        return {
+            type: 'seo',
+            data: data
+        };
+    }
+
+    async performWebPatternsScan(url) {
+        this.updateLoadingStatus('Connecting to PageSpeed Best Practices API...', 20);
+        
+        // Use dedicated Web Patterns API for best practices analysis
+        const response = await fetch(`${this.baseURL}/api/web-patterns`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url: url })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Web Patterns scan failed: ${response.status}`);
+        }
+
+        this.updateLoadingStatus('Analyzing web development best practices...', 70);
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.error || 'Web Patterns scan failed');
+        }
+
+        this.updateLoadingStatus('Generating web patterns report...', 95);
+        return {
+            type: 'web-patterns',
+            data: data
+        };
+    }
+
+    async performFullAudit(url) {
+        this.updateLoadingStatus('Starting comprehensive audit...', 5);
+        
+        const response = await fetch(`${this.baseURL}/api/audit`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ url: url })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Full audit failed: ${response.status}`);
+        }
+
+        this.updateLoadingStatus('Processing security + performance + SEO...', 40);
+        await this.simulateProgress();
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.error || 'Full audit failed');
+        }
+
+        this.updateLoadingStatus('Finalizing triple audit report...', 95);
+        return {
+            type: 'full',
+            data: data
+        };
+    }
+
+    async simulateProgress() {
+        const steps = [
+            { message: 'Scanning for vulnerabilities...', progress: 50 },
+            { message: 'Analyzing performance metrics...', progress: 65 },
+            { message: 'Evaluating SEO factors...', progress: 80 },
+            { message: 'Compiling comprehensive report...', progress: 90 }
+        ];
+
+        for (const step of steps) {
+            await new Promise(resolve => setTimeout(resolve, 800));
+            this.updateLoadingStatus(step.message, step.progress);
+        }
+    }
+
+    displayResults(results) {
+        const { type, data } = results;
+        
+        let html = '';
+        
+        switch (type) {
+            case 'security':
+                html = this.renderSecurityResults(data);
+                break;
+            case 'performance':
+                html = this.renderPerformanceResults(data);
+                break;
+            case 'seo':
+                html = this.renderSEOResults(data);
+                break;
+            case 'web-patterns':
+                html = this.renderWebPatternsResults(data);
+                break;
+            case 'full':
+                html = this.renderFullAuditResults(data);
+                break;
+        }
+        
+        this.resultsContent.innerHTML = html;
+        
+        // Animate results appearance
+        setTimeout(() => {
+            this.resultsContent.querySelectorAll('.summary-card, .vulnerability-item').forEach((el, index) => {
+                setTimeout(() => {
+                    el.style.animation = 'slideInUp 0.5s ease forwards';
+                }, index * 100);
+            });
+        }, 100);
+    }
+
+    renderSecurityResults(data) {
+        const report = data.security_report || data.data || data;
+        
+        return `
+            <div class=\"results-display\">
+                <div class=\"results-header\">
+                    <h3><i class=\"fas fa-shield-alt\"></i> Security Analysis Results</h3>
+                    <div class=\"scan-meta\">
+                        <span class=\"scan-time\">⚡ ${report.scan_duration || 0}s</span>
+                        <span class=\"modules-count\">🔧 ${(report.modules_scanned || []).length} modules</span>
+                        <div class=\"pdf-buttons-inline\">
+                            <button class=\"action-btn pdf-btn\" onclick=\"window.zowtiCheck.generateModulePDF('security')\">
+                                <i class=\"fas fa-chart-pie\"></i> Executive PDF
+                            </button>
+                            <button class=\"action-btn pdf-btn\" onclick=\"window.zowtiCheck.generateModulePDF('security', 'detailed')\">
+                                <i class=\"fas fa-file-alt\"></i> Technical PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class=\"results-summary\">
+                    <div class=\"summary-card\">
+                        <div class=\"summary-score ${this.getScoreClass(report.security_score || 0)}\">${report.security_score || 0}/100</div>
+                        <div class=\"summary-label\">Security Score</div>
+                    </div>
+                    <div class=\"summary-card\">
+                        <div class=\"summary-score\">${report.total_vulnerabilities || 0}</div>
+                        <div class=\"summary-label\">Vulnerabilities</div>
+                    </div>
+                    <div class=\"summary-card\">
+                        <div class=\"summary-score ${this.getRiskClass(report.risk_level || 'LOW')}\">${report.risk_level || 'UNKNOWN'}</div>
+                        <div class=\"summary-label\">Risk Level</div>
+                    </div>
+                </div>
+                
+                ${this.renderVulnerabilities(report.vulnerabilities)}
+            </div>
+        `;
+    }
+
+    renderPerformanceResults(data) {
+        const perf = data.performance || data.data || data;
+        
+        // Check if this is dual data (mobile + desktop)
+        if (perf.mobile && perf.desktop) {
+            return this.renderDualPerformanceResults(perf);
+        }
+        
+        // Fallback to single device rendering
+        return `
+            <div class="results-display">
+                <div class="results-header">
+                    <h3><i class="fas fa-tachometer-alt"></i> Performance Analysis Results</h3>
+                    <div class="pdf-buttons-inline">
+                        <button class="action-btn pdf-btn" onclick="window.zowtiCheck.generateModulePDF('performance')">
+                            <i class="fas fa-chart-pie"></i> Executive PDF
+                        </button>
+                        <button class="action-btn pdf-btn" onclick="window.zowtiCheck.generateModulePDF('performance', 'detailed')">
+                            <i class="fas fa-file-alt"></i> Technical PDF
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="results-summary">
+                    <div class="summary-card">
+                        <div class="summary-score ${this.getScoreClass(perf.score || 0)}">${perf.score || 0}/100</div>
+                        <div class="summary-label">Performance Score</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-score">${(perf.core_vitals && perf.core_vitals.lcp) || 'N/A'}</div>
+                        <div class="summary-label">LCP</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-score">${(perf.core_vitals && perf.core_vitals.cls) || 'N/A'}</div>
+                        <div class="summary-label">CLS</div>
+                    </div>
+                </div>
+                
+                <div class="performance-details">
+                    <h4>Core Web Vitals</h4>
+                    <div class="metrics-grid">
+                        ${perf.metrics ? Object.entries(perf.metrics).map(([key, value]) => `
+                            <div class="metric-item">
+                                <span class="metric-name">${key.replace(/-/g, ' ').toUpperCase()}</span>
+                                <span class="metric-value">${value}</span>
+                            </div>
+                        `).join('') : '<p>No metrics available</p>'}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderDualPerformanceResults(data) {
+        const mobile = data.mobile || {};
+        const desktop = data.desktop || {};
+        const summary = data.summary || {};
+        
+        return `
+            <div class="results-display">
+                <div class="results-header">
+                    <h3><i class="fas fa-tachometer-alt"></i> Performance Analysis Results</h3>
+                    <div class="scan-meta">
+                        <span class="scan-time">⚡ ${data.total_time || 'N/A'}</span>
+                        <span class="scan-devices">📱💻 Mobile + Desktop</span>
+                        <div class="pdf-buttons-inline">
+                            <button class="action-btn pdf-btn" onclick="window.zowtiCheck.generateModulePDF('performance')">
+                                <i class="fas fa-chart-pie"></i> Executive PDF
+                            </button>
+                            <button class="action-btn pdf-btn" onclick="window.zowtiCheck.generateModulePDF('performance', 'detailed')">
+                                <i class="fas fa-file-alt"></i> Technical PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dual-performance-summary">
+                    <div class="device-comparison">
+                        <div class="device-card mobile">
+                            <div class="device-header">
+                                <i class="fas fa-mobile-alt"></i>
+                                <span class="device-name">Mobile</span>
+                            </div>
+                            <div class="device-score ${this.getScoreClass(mobile.score || 0)}">
+                                ${mobile.score || 0}/100
+                            </div>
+                            <div class="device-status">${this.getPerformanceStatus(mobile.score || 0)}</div>
+                        </div>
+                        
+                        <div class="score-difference">
+                            <div class="diff-value">${summary.score_difference || 0}</div>
+                            <div class="diff-label">Point Difference</div>
+                        </div>
+                        
+                        <div class="device-card desktop">
+                            <div class="device-header">
+                                <i class="fas fa-desktop"></i>
+                                <span class="device-name">Desktop</span>
+                            </div>
+                            <div class="device-score ${this.getScoreClass(desktop.score || 0)}">
+                                ${desktop.score || 0}/100
+                            </div>
+                            <div class="device-status">${this.getPerformanceStatus(desktop.score || 0)}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dual-vitals-comparison">
+                    <h4>Core Web Vitals Comparison</h4>
+                    <div class="vitals-grid">
+                        <div class="vital-comparison">
+                            <div class="vital-name">Largest Contentful Paint (LCP)</div>
+                            <div class="vital-values">
+                                <span class="mobile-value">📱 ${(mobile.core_vitals && mobile.core_vitals.lcp) || 'N/A'}</span>
+                                <span class="desktop-value">💻 ${(desktop.core_vitals && desktop.core_vitals.lcp) || 'N/A'}</span>
+                            </div>
+                        </div>
+                        <div class="vital-comparison">
+                            <div class="vital-name">Cumulative Layout Shift (CLS)</div>
+                            <div class="vital-values">
+                                <span class="mobile-value">📱 ${(mobile.core_vitals && mobile.core_vitals.cls) || 'N/A'}</span>
+                                <span class="desktop-value">💻 ${(desktop.core_vitals && desktop.core_vitals.cls) || 'N/A'}</span>
+                            </div>
+                        </div>
+                        <div class="vital-comparison">
+                            <div class="vital-name">First Contentful Paint (FCP)</div>
+                            <div class="vital-values">
+                                <span class="mobile-value">📱 ${(mobile.metrics && mobile.metrics['first-contentful-paint']) || 'N/A'}</span>
+                                <span class="desktop-value">💻 ${(desktop.metrics && desktop.metrics['first-contentful-paint']) || 'N/A'}</span>
+                            </div>
+                        </div>
+                        <div class="vital-comparison">
+                            <div class="vital-name">Speed Index</div>
+                            <div class="vital-values">
+                                <span class="mobile-value">📱 ${(mobile.metrics && mobile.metrics['speed-index']) || 'N/A'}</span>
+                                <span class="desktop-value">💻 ${(desktop.metrics && desktop.metrics['speed-index']) || 'N/A'}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    getPerformanceStatus(score) {
+        if (score >= 90) return 'GOOD';
+        if (score >= 50) return 'NEEDS IMPROVEMENT';
+        return 'POOR';
+    }
+
+    renderSEOResults(data) {
+        const seo = data.seo || data.data || data;
+        
+        // Check if this is dual SEO data (mobile + desktop)
+        if (seo.mobile && seo.desktop) {
+            return this.renderDualSEOResults(seo);
+        }
+        
+        // Fallback to single device rendering (legacy compatibility)
+        const report = data.security_report || data.data || data;
+        const allVulns = Array.isArray(report.vulnerabilities) ? report.vulnerabilities : [];
+        const seoVulns = allVulns.filter(v => v.type && v.type.includes('SEO'));
+        
+        return `
+            <div class=\"results-display\">
+                <div class=\"results-header\">
+                    <h3><i class=\"fas fa-search\"></i> SEO Analysis Results</h3>
+                    <div class=\"scan-meta\">
+                        <span class=\"scan-time\">⚡ ${report.scan_duration || '0'}s</span>
+                        <span class=\"seo-issues\">🔍 ${seoVulns.length} SEO issues</span>
+                        <div class=\"pdf-buttons-inline\">
+                            <button class=\"action-btn pdf-btn\" onclick=\"window.zowtiCheck.generateModulePDF('seo')\">
+                                <i class=\"fas fa-chart-pie\"></i> Executive PDF
+                            </button>
+                            <button class=\"action-btn pdf-btn\" onclick=\"window.zowtiCheck.generateModulePDF('seo', 'detailed')\">
+                                <i class=\"fas fa-file-alt\"></i> Technical PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class=\"results-summary\">
+                    <div class=\"summary-card\">
+                        <div class=\"summary-score ${this.getScoreClass(report.security_score || 0)}\">${report.security_score || 0}/100</div>
+                        <div class=\"summary-label\">SEO Score</div>
+                    </div>
+                    <div class=\"summary-card\">
+                        <div class=\"summary-score\">${seoVulns.length}</div>
+                        <div class=\"summary-label\">SEO Issues</div>
+                    </div>
+                    <div class=\"summary-card\">
+                        <div class=\"summary-score ${this.getRiskClass(report.risk_level || 'LOW')}\">${report.risk_level || 'UNKNOWN'}</div>
+                        <div class=\"summary-label\">SEO Health</div>
+                    </div>
+                </div>
+                
+                <div class=\"seo-analysis\">
+                    <h4><i class=\"fas fa-search-plus\"></i> SEO Optimization Opportunities</h4>
+                    ${this.renderVulnerabilities(seoVulns)}
+                </div>
+            </div>
+        `;
+    }
+
+    renderDualSEOResults(data) {
+        const mobile = data.mobile || {};
+        const desktop = data.desktop || {};
+        const summary = data.summary || {};
+        
+        return `
+            <div class="results-display">
+                <div class="results-header">
+                    <h3><i class="fas fa-search"></i> SEO Analysis Results</h3>
+                    <div class="scan-meta">
+                        <span class="scan-time">⚡ ${data.total_time || 'N/A'}</span>
+                        <span class="scan-devices">📱💻 Mobile + Desktop</span>
+                    </div>
+                </div>
+                
+                <div class="dual-performance-summary">
+                    <div class="device-comparison">
+                        <div class="device-card mobile">
+                            <div class="device-header">
+                                <i class="fas fa-mobile-alt"></i>
+                                <span class="device-name">Mobile SEO</span>
+                            </div>
+                            <div class="device-score ${this.getScoreClass(mobile.seo_score || 0)}">
+                                ${mobile.seo_score || 0}/100
+                            </div>
+                            <div class="device-status">${this.getSEOStatus(mobile.seo_score || 0)}</div>
+                        </div>
+                        
+                        <div class="score-difference">
+                            <div class="diff-value">${summary.score_difference || 0}</div>
+                            <div class="diff-label">Point Difference</div>
+                        </div>
+                        
+                        <div class="device-card desktop">
+                            <div class="device-header">
+                                <i class="fas fa-desktop"></i>
+                                <span class="device-name">Desktop SEO</span>
+                            </div>
+                            <div class="device-score ${this.getScoreClass(desktop.seo_score || 0)}">
+                                ${desktop.seo_score || 0}/100
+                            </div>
+                            <div class="device-status">${this.getSEOStatus(desktop.seo_score || 0)}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="dual-vitals-comparison">
+                    <h4>SEO Issues Comparison</h4>
+                    <div class="vitals-grid">
+                        <div class="vital-comparison">
+                            <div class="vital-name">Total Issues Found</div>
+                            <div class="vital-values">
+                                <span class="mobile-value">📱 ${mobile.total_issues || 0} issues</span>
+                                <span class="desktop-value">💻 ${desktop.total_issues || 0} issues</span>
+                            </div>
+                        </div>
+                        <div class="vital-comparison">
+                            <div class="vital-name">SEO Health Status</div>
+                            <div class="vital-values">
+                                <span class="mobile-value">📱 ${mobile.risk_level || 'N/A'}</span>
+                                <span class="desktop-value">💻 ${desktop.risk_level || 'N/A'}</span>
+                            </div>
+                        </div>
+                        <div class="vital-comparison">
+                            <div class="vital-name">Analysis Source</div>
+                            <div class="vital-values">
+                                <span class="mobile-value">📱 ${mobile.source || 'Google PageSpeed'}</span>
+                                <span class="desktop-value">💻 ${desktop.source || 'Google PageSpeed'}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                ${this.renderSEOIssuesComparison(mobile, desktop)}
+            </div>
+        `;
+    }
+
+    getSEOStatus(score) {
+        if (score >= 90) return 'EXCELLENT';
+        if (score >= 80) return 'GOOD';
+        if (score >= 60) return 'NEEDS IMPROVEMENT';
+        return 'POOR';
+    }
+
+    renderSEOIssuesComparison(mobile, desktop) {
+        const mobileIssues = mobile.issues || [];
+        const desktopIssues = desktop.issues || [];
+        
+        if (mobileIssues.length === 0 && desktopIssues.length === 0) {
+            return `
+                <div class="no-vulnerabilities">
+                    <i class="fas fa-check-circle"></i>
+                    <p>No SEO issues detected on either device. Excellent SEO optimization!</p>
+                </div>
+            `;
+        }
+        
+        return `
+            <div class="seo-issues-comparison">
+                <h4><i class="fas fa-search-plus"></i> SEO Issues by Device</h4>
+                
+                <div class="device-issues-grid">
+                    <div class="device-issues mobile-issues">
+                        <h5>📱 Mobile Issues (${mobileIssues.length})</h5>
+                        ${mobileIssues.length > 0 ? 
+                            mobileIssues.map(issue => `
+                                <div class="issue-item ${issue.severity || 'info'}">
+                                    <span class="issue-title">${issue.type || 'SEO Issue'}</span>
+                                    <span class="issue-severity ${issue.severity || 'info'}">${issue.severity || 'info'}</span>
+                                </div>
+                            `).join('') :
+                            '<p class="no-issues">No mobile-specific SEO issues found</p>'
+                        }
+                    </div>
+                    
+                    <div class="device-issues desktop-issues">
+                        <h5>💻 Desktop Issues (${desktopIssues.length})</h5>
+                        ${desktopIssues.length > 0 ? 
+                            desktopIssues.map(issue => `
+                                <div class="issue-item ${issue.severity || 'info'}">
+                                    <span class="issue-title">${issue.type || 'SEO Issue'}</span>
+                                    <span class="issue-severity ${issue.severity || 'info'}">${issue.severity || 'info'}</span>
+                                </div>
+                            `).join('') :
+                            '<p class="no-issues">No desktop-specific SEO issues found</p>'
+                        }
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderWebPatternsResults(data) {
+        const patterns = data.web_patterns || data.data || data;
+        
+        return `
+            <div class="results-display">
+                <div class="results-header">
+                    <h3><i class="fas fa-code"></i> Web Development Patterns Results</h3>
+                    <div class="scan-meta">
+                        <span class="scan-time">⚡ Analysis completed</span>
+                        <span class="patterns-source">📊 Google PageSpeed Best Practices</span>
+                        <div class="pdf-buttons-inline">
+                            <button class="action-btn pdf-btn" onclick="window.zowtiCheck.generateModulePDF('web_patterns')">
+                                <i class="fas fa-chart-pie"></i> Executive PDF
+                            </button>
+                            <button class="action-btn pdf-btn" onclick="window.zowtiCheck.generateModulePDF('web_patterns', 'detailed')">
+                                <i class="fas fa-file-alt"></i> Technical PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="results-summary">
+                    <div class="summary-card">
+                        <div class="summary-score ${this.getScoreClass(patterns.best_practices_score || 0)}">
+                            ${patterns.best_practices_score || 0}/100
+                        </div>
+                        <div class="summary-label">Best Practices Score</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-score">${patterns.total_issues || 0}</div>
+                        <div class="summary-label">Issues Found</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-score ${this.getWebPatternsClass(patterns.best_practices_score || 0)}">
+                            ${this.getWebPatternsStatus(patterns.best_practices_score || 0)}
+                        </div>
+                        <div class="summary-label">Code Quality</div>
+                    </div>
+                </div>
+                
+                <div class="web-patterns-analysis">
+                    <h4><i class="fas fa-tools"></i> Development Best Practices</h4>
+                    ${this.renderWebPatternsIssues(patterns.issues || [])}
+                </div>
+                
+                <div class="patterns-info">
+                    <p><strong>Analysis Source:</strong> ${patterns.source || 'Google PageSpeed Insights Best Practices'}</p>
+                    <p><strong>Categories Analyzed:</strong> HTTPS usage, HTTP/2 implementation, vulnerable libraries, console errors, image optimization, font preloading, and character encoding.</p>
+                </div>
+            </div>
+        `;
+    }
+
+    getWebPatternsStatus(score) {
+        if (score >= 90) return 'GOOD';
+        if (score >= 80) return 'SATISFACTORY';
+        if (score >= 60) return 'NEEDS WORK';
+        return 'POOR';
+    }
+
+    getWebPatternsClass(score) {
+        if (score >= 80) return 'success';
+        if (score >= 60) return 'warning';
+        return 'error';
+    }
+
+    renderWebPatternsIssues(issues) {
+        if (!issues || issues.length === 0) {
+            return `
+                <div class="no-vulnerabilities">
+                    <i class="fas fa-check-circle"></i>
+                    <p>All best practices are being followed! Excellent web development patterns.</p>
+                </div>
+            `;
+        }
+        
+        return `
+            <div class="patterns-issues-list">
+                ${issues.map(issue => `
+                    <div class="issue-item ${issue.severity || 'info'}">
+                        <div class="issue-header">
+                            <span class="issue-title">${issue.type || 'Best Practice Issue'}</span>
+                            <span class="issue-severity ${issue.severity || 'info'}">${issue.severity || 'info'}</span>
+                        </div>
+                        <div class="issue-description">${issue.description || 'No description available'}</div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    renderFullAuditResults(data) {
+        const security = data.security || {};
+        const performance = data.performance || {};
+        const seo = data.seo || {};
+        const webPatterns = data.web_patterns || {};
+        
+        // Handle scores for all modules
+        const securityScore = security.connection_error ? 'ERROR' : (security.security_score || 0);
+        const performanceScore = performance.error ? 'ERROR' : this.getAveragePerformanceScore(performance);
+        const seoScore = seo.error ? 'ERROR' : this.getAverageSEOScore(seo);
+        const patternsScore = webPatterns.error ? 'ERROR' : (webPatterns.best_practices_score || 0);
+        
+        // Extract vulnerabilities - count from total_vulnerabilities for accuracy
+        const securityIssues = security.total_vulnerabilities || 0;
+        
+        // Extract vulnerabilities array for detailed display
+        let vulnerabilities = [];
+        if (security.vulnerabilities) {
+            if (Array.isArray(security.vulnerabilities)) {
+                vulnerabilities = security.vulnerabilities;
+            } else if (typeof security.vulnerabilities === 'object') {
+                const vulnObj = security.vulnerabilities;
+                vulnerabilities = [
+                    ...(vulnObj.critical_high || []),
+                    ...(vulnObj.high || []),
+                    ...(vulnObj.medium || []),
+                    ...(vulnObj.low || [])
+                ];
+            }
+        }
+        
+        const totalIssues = vulnerabilities.length + (seo.summary?.total_issues || 0) + (webPatterns.total_issues || 0);
+        
+        return `
+            <div class="results-display">
+                <div class="results-header">
+                    <h3><i class="fas fa-star"></i> Complete 4-Module Audit Results</h3>
+                    <div class="scan-meta">
+                        <span class="scan-time">⚡ ${data.audit_duration || 0}s</span>
+                        <span class="timestamp">📅 ${data.timestamp || 'Unknown'}</span>
+                    </div>
+                </div>
+                
+                <div class="results-summary">
+                    <div class="summary-card">
+                        <div class="summary-score ${securityScore === 'ERROR' ? 'error' : this.getScoreClass(securityScore)}">${securityScore}${securityScore !== 'ERROR' ? '/100' : ''}</div>
+                        <div class="summary-label">Security</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-score">📱${performance.mobile?.score || 0} 💻${performance.desktop?.score || 0}</div>
+                        <div class="summary-label">Performance</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-score">📱${seo.mobile?.seo_score || 0} 💻${seo.desktop?.seo_score || 0}</div>
+                        <div class="summary-label">SEO</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-score ${patternsScore === 'ERROR' ? 'error' : this.getScoreClass(patternsScore)}">${patternsScore}${patternsScore !== 'ERROR' ? '/100' : ''}</div>
+                        <div class="summary-label">Web Patterns</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-score">${securityIssues}+${(seo.summary?.total_issues || 0) + (webPatterns.total_issues || 0)}</div>
+                        <div class="summary-label">Security + Others</div>
+                    </div>
+                </div>
+                
+                <div class="audit-summary-section">
+                    <h4><i class="fas fa-chart-line"></i> Executive Summary</h4>
+                    <div class="summary-grid">
+                        <div class="module-summary security-summary">
+                            <div class="module-header">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Security Analysis</span>
+                            </div>
+                            ${security.connection_error ? 
+                                `<div class="module-status error">Connection Error</div>` :
+                                `
+                                <div class="module-score ${this.getScoreClass(securityScore)}">${securityScore}/100</div>
+                                <div class="module-details">
+                                    <span class="detail-item">${vulnerabilities.length} vulnerabilities</span>
+                                    <span class="detail-item risk-${(security.risk_level || 'low').toLowerCase()}">${security.risk_level || 'Unknown'} Risk</span>
+                                </div>
+                                `
+                            }
+                        </div>
+                        
+                        <div class="module-summary performance-summary">
+                            <div class="module-header">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span>Performance Analysis</span>
+                            </div>
+                            ${performance.error ? 
+                                `<div class="module-status error">Analysis Error</div>` :
+                                `
+                                <div class="module-score ${this.getScoreClass(performanceScore)}">${performanceScore}/100</div>
+                                <div class="module-details">
+                                    <span class="detail-item">📱 ${performance.mobile?.score || 0}/100</span>
+                                    <span class="detail-item">💻 ${performance.desktop?.score || 0}/100</span>
+                                </div>
+                                `
+                            }
+                        </div>
+                        
+                        <div class="module-summary seo-summary">
+                            <div class="module-header">
+                                <i class="fas fa-search"></i>
+                                <span>SEO Analysis</span>
+                            </div>
+                            ${seo.error ? 
+                                `<div class="module-status error">Analysis Error</div>` :
+                                `
+                                <div class="module-score ${this.getScoreClass(seoScore)}">${seoScore}/100</div>
+                                <div class="module-details">
+                                    <span class="detail-item">📱 ${seo.mobile?.seo_score || 0}/100</span>
+                                    <span class="detail-item">💻 ${seo.desktop?.seo_score || 0}/100</span>
+                                </div>
+                                `
+                            }
+                        </div>
+                        
+                        <div class="module-summary patterns-summary">
+                            <div class="module-header">
+                                <i class="fas fa-code"></i>
+                                <span>Web Development Patterns</span>
+                            </div>
+                            ${webPatterns.error ? 
+                                `<div class="module-status error">Analysis Error</div>` :
+                                `
+                                <div class="module-score ${this.getScoreClass(patternsScore)}">${patternsScore}/100</div>
+                                <div class="module-details">
+                                    <span class="detail-item">${webPatterns.total_issues || 0} issues found</span>
+                                    <span class="detail-item quality-${this.getWebPatternsStatus(patternsScore).toLowerCase().replace(' ', '-')}">${this.getWebPatternsStatus(patternsScore)}</span>
+                                </div>
+                                `
+                            }
+                        </div>
+                    </div>
+                    
+                    <div class="audit-footer">
+                        <p><strong>📊 Analysis Complete:</strong> Comprehensive security, performance, SEO, and web development patterns audit completed successfully.</p>
+                        <p><strong>💡 Recommendation:</strong> For a deep-dive analysis, download the <strong>Technical PDF</strong> or export the <strong>JSON</strong> report.</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    getAveragePerformanceScore(performance) {
+        if (performance.mobile?.score && performance.desktop?.score) {
+            return Math.round((performance.mobile.score + performance.desktop.score) / 2);
+        }
+        return performance.score || 0;
+    }
+
+    getAverageSEOScore(seo) {
+        if (seo.mobile?.seo_score && seo.desktop?.seo_score) {
+            return Math.round((seo.mobile.seo_score + seo.desktop.seo_score) / 2);
+        }
+        return seo.seo_score || 0;
+    }
+
+    renderVulnerabilities(vulnerabilities) {
+        // Ensure vulnerabilities is always an array
+        const vulnArray = Array.isArray(vulnerabilities) ? vulnerabilities : [];
+        
+        if (!vulnArray || vulnArray.length === 0) {
+            return `
+                <div class=\"no-vulnerabilities\">
+                    <i class=\"fas fa-check-circle\"></i>
+                    <p>No vulnerabilities detected. Excellent security posture!</p>
+                </div>
+            `;
+        }
+
+        return `
+            <div class=\"vulnerability-list\">
+                <h4>Security Issues Detected</h4>
+                ${vulnArray.map(vuln => `
+                    <div class=\"vulnerability-item ${vuln.severity || 'info'}\">
+                        <div class=\"vuln-header\">
+                            <span class=\"vuln-title\">${vuln.type || 'Unknown Issue'}</span>
+                            <span class=\"vuln-severity ${vuln.severity || 'info'}\">${vuln.severity || 'info'}</span>
+                        </div>
+                        <div class=\"vuln-description\">${vuln.description || 'No description available'}</div>
+                        ${vuln.location ? `<div class=\"vuln-location\"><strong>Location:</strong> ${vuln.location}</div>` : ''}
+                        ${vuln.evidence ? `<div class=\"vuln-evidence\"><strong>Evidence:</strong> <code>${vuln.evidence}</code></div>` : ''}
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+
+    displayError(message) {
+        this.resultsContent.innerHTML = `
+            <div class=\"error-display\">
+                <div class=\"error-icon\">
+                    <i class=\"fas fa-exclamation-triangle\"></i>
+                </div>
+                <h3>Scan Failed</h3>
+                <p>${message}</p>
+                <button class=\"retry-btn\" onclick=\"location.reload()\">
+                    <i class=\"fas fa-redo\"></i>
+                    Try Again
+                </button>
+            </div>
+        `;
+    }
+
+    exportResults() {
+        if (!this.currentResults) return;
+        
+        const dataStr = JSON.stringify(this.currentResults, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(dataBlob);
+        link.download = `zowticheck-report-${Date.now()}.json`;
+        link.click();
+        
+        console.log('📊 Results exported successfully');
+    }
+
+    generatePDFSummary() {
+        if (!this.currentResults) {
+            alert('No audit results available. Please run a Full Audit first.');
             return;
         }
         
-        // Clean URL (remove protocols if user added them)
-        const cleanUrl = url.replace(/^https?:\/\//, '');
+        // Create summary data for client presentation
+        const summaryData = {
+            type: 'executive_summary',
+            target: this.currentResults.target,
+            timestamp: this.currentResults.timestamp,
+            security_score: this.currentResults.security?.security_score || 0,
+            performance_mobile: this.currentResults.performance?.mobile?.score || 0,
+            performance_desktop: this.currentResults.performance?.desktop?.score || 0,
+            seo_mobile: this.currentResults.seo?.mobile?.seo_score || 0,
+            seo_desktop: this.currentResults.seo?.desktop?.seo_score || 0,
+            web_patterns_score: this.currentResults.web_patterns?.best_practices_score || 0,
+            total_security_issues: this.currentResults.security?.total_vulnerabilities || 0,
+            total_seo_issues: this.currentResults.seo?.summary?.total_issues || 0,
+            total_web_issues: this.currentResults.web_patterns?.total_issues || 0
+        };
         
-        this.startScan();
-        this.showScanStatus('ping', `🔍 Verificando conectividade com ${cleanUrl}...`);
-        
-        try {
-            // Step 1: Smart URL detection with real backend (already has backend integration)
-            const detectionResult = await this.simulateSmartDetection(cleanUrl);
-            
-            if (detectionResult.error) {
-                this.showScanStatus('error', `❌ ${detectionResult.error}`);
-                // Keep error message visible until next scan - don't hide it
-                this.endScan();
-                return;
-            }
-            
-            // Step 2: Protocol detection
-            this.showScanStatus('protocol', `✅ Host acessível! Detectando protocolo (HTTP/HTTPS)...`);
-            await this.delay(1000);
-            
-            this.showScanStatus('protocol', `🔒 Protocolo detectado: ${detectionResult.protocol.toUpperCase()}`);
-            await this.delay(1000);
-            
-            // Step 3: Perform real scan with backend (already has backend integration)
-            this.showScanStatus('scanning', `🛡️ Escaneando ${detectionResult.finalUrl} com 14 módulos...`);
-            const result = await this.performSafeScan(detectionResult.finalUrl);
-            
-            this.hideScanStatus();
-            this.displayScanResults(result);
-            this.endScan();  // Para o estado de scanning
-            
-        } catch (error) {
-            this.showScanStatus('error', `❌ Erro durante o scan: ${error.message}`);
-            // Keep error message visible until next scan - don't hide it
-            this.endScan();
+        this.downloadPDF(summaryData, 'summary');
+    }
+
+    generatePDFDetailed() {
+        if (!this.currentResults) {
+            alert('No audit results available. Please run a Full Audit first.');
+            return;
         }
+        
+        // Use complete audit data for technical report
+        const detailedData = {
+            type: 'technical_report',
+            ...this.currentResults
+        };
+        
+        this.downloadPDF(detailedData, 'detailed');
     }
-    
-    showScanStatus(type, message) {
-        const statusEl = document.getElementById('scanStatus');
-        statusEl.className = `scan-status ${type}`;
-        statusEl.innerHTML = message;
-        statusEl.style.display = 'block';
+
+    generateModulePDF(moduleType, reportType = 'summary') {
+        if (!this.currentResults) {
+            alert('No audit results available. Please run a scan first.');
+            return;
+        }
+
+        const moduleData = {
+            type: reportType === 'summary' ? 'executive_summary' : 'technical_report',
+            module: moduleType,
+            target: this.currentResults.target || 'Unknown',
+            timestamp: new Date().toISOString(),
+            ...this.currentResults
+        };
+
+        console.log(`🔄 Generating ${reportType} PDF for ${moduleType} module...`);
+        this.downloadPDF(moduleData, reportType);
     }
-    
-    hideScanStatus() {
-        const statusEl = document.getElementById('scanStatus');
-        statusEl.style.display = 'none';
-    }
-    
-    async simulateSmartDetection(domain) {
+
+    async downloadPDF(data, type) {
         try {
-            // Call real backend API for smart detection
-            const response = await fetch('/api/smart-detect', {
+            const response = await fetch(`${this.baseURL}/api/generate-pdf`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ domain })
+                body: JSON.stringify({
+                    data: data,
+                    report_type: type
+                })
             });
+
+            if (!response.ok) {
+                throw new Error(`PDF generation failed: ${response.status}`);
+            }
+
+            const blob = await response.blob();
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
             
-            const result = await response.json();
-            return result;
+            const filename = type === 'summary' 
+                ? `zowticheck-executive-summary-${Date.now()}.pdf`
+                : `zowticheck-technical-report-${Date.now()}.pdf`;
             
+            link.download = filename;
+            link.click();
+            
+            console.log(`📄 PDF ${type} report generated successfully`);
         } catch (error) {
-            // Fallback to simulation if backend not available
-            await this.delay(1500);
-            
-            // Check for known non-accessible domains
-            const nonAccessibleDomains = [
-                'www.mcsarc.com.br',
-                'www.candiottovalle.com.br',
-                'mcsarc.com',  // without .br
-                'candiottovalle.com'  // without .br
-            ];
-            
-            if (nonAccessibleDomains.some(d => domain.includes(d) && domain.includes('www.'))) {
-                return {
-                    error: `Host '${domain}' não está acessível. Verifique se o domínio está correto ou tente sem 'www.'`
-                };
-            }
-            
-            // Simulate protocol detection for accessible domains
-            const httpsOnlyDomains = ['zowti.com', 'github.com', 'google.com', 'facebook.com', 'linkedin.com'];
-            const httpsDomains = ['mcsarc.com.br', 'candiottovalle.com.br'];
-            
-            let protocol = 'http';
-            let finalUrl;
-            
-            // First try HTTPS for known HTTPS-only domains
-            if (httpsOnlyDomains.some(d => domain.includes(d))) {
-                protocol = 'https';
-                finalUrl = `${protocol}://${domain}`;
-            }
-            // For domains that support both, try HTTPS first, fallback to HTTP
-            else if (httpsDomains.some(d => domain.includes(d))) {
-                protocol = 'https';
-                finalUrl = `${protocol}://${domain}`;
-                
-                // Simulate checking if HTTPS works, if not fallback to HTTP
-                if (domain.includes('mcsarc.com.br') && !domain.includes('www.')) {
-                    // mcsarc.com.br redirects HTTP to HTTPS
-                    protocol = 'https';
-                    finalUrl = `${protocol}://${domain}`;
-                } else if (domain.includes('candiottovalle.com.br')) {
-                    // candiottovalle.com.br works with both but redirects to HTTPS
-                    protocol = 'https';
-                    finalUrl = `${protocol}://${domain}`;
-                }
-            }
-            // Default to HTTP for unknown domains
-            else {
-                protocol = 'http';
-                finalUrl = `${protocol}://${domain}`;
-            }
-            
-            return {
-                protocol,
-                finalUrl,
-                error: null
-            };
+            console.error('PDF generation error:', error);
+            alert(`Failed to generate PDF report: ${error.message}`);
         }
     }
 
-    // REAL SCAN WITH BACKEND INTEGRATION
-    async performSafeScan(url) {
-        try {
-            // Call real backend API for scanning
-            const response = await fetch('/api/scan', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ url })
-            });
-            
-            const result = await response.json();
-            
-            if (result.error) {
-                throw new Error(result.error);
-            }
-            
-            return result;
-            
-        } catch (error) {
-            // Fallback to simulation if backend not available
-            await this.delay(2000 + Math.random() * 2000);
-            
-            // Use the correct URL (already includes protocol detection)
-            const analysisResult = this.generateSafeAnalysis(url);
-            const score = this.calculateSecurityScore(analysisResult.vulnerabilities, analysisResult.positiveChecks);
-            
-            return {
-                target: url,
-                security_score: score,
-                risk_level: this.getRiskLevel(score),
-                total_vulnerabilities: analysisResult.vulnerabilities.length,
-                vulnerabilities: this.categorizeVulnerabilities(analysisResult.vulnerabilities),
-                positiveChecks: analysisResult.positiveChecks,
-                scan_duration: (2 + Math.random() * 2).toFixed(2)
-            };
-        }
+    showLoadingOverlay() {
+        this.loadingOverlay.classList.remove('hidden');
+        this.updateLoadingStatus('Initializing scan...', 0);
     }
 
-    // Check if URL is known to be inaccessible
-    isInaccessibleUrl(urlLower) {
-        const inaccessiblePatterns = [
-            'https://www.mcsarc.com.br',
-            'http://www.mcsarc.com.br',
-            'www.mcsarc.com.br',
-            'https://www.candiottovalle.com.br',
-            'http://www.candiottovalle.com.br',
-            'www.candiottovalle.com.br'
-        ];
-        
-        return inaccessiblePatterns.some(pattern => urlLower.includes(pattern));
+    hideLoadingOverlay() {
+        this.loadingOverlay.classList.add('hidden');
     }
 
-    // SAFE ANALYSIS - NO INJECTION TESTING
-    generateSafeAnalysis(url) {
-        const vulnerabilities = [];
-        const positiveChecks = [];
-        
-        // CONSISTENT RESULTS BASED ON URL
-        const urlLower = url.toLowerCase();
-        
-        // Check if URL is inaccessible
-        if (this.isInaccessibleUrl(urlLower)) {
-            throw new Error(`Site não acessível ou não encontrado. Verifique se o domínio está correto.`);
-        }
-        
-        // POSITIVE SECURITY CHECKS (add points)
-        if (url.startsWith('https://')) {
-            positiveChecks.push({
-                type: "HTTPS Protocol",
-                points: 10,
-                description: "Site uses secure HTTPS connection"
-            });
-        }
-        
-        // HTTP to HTTPS redirect (based on our URL detection logic)
-        // These domains are known to redirect HTTP to HTTPS
-        if (url.startsWith('https://') && (urlLower.includes('mcsarc.com.br') || urlLower.includes('candiottovalle.com.br'))) {
-            positiveChecks.push({
-                type: "HTTP Redirect",
-                points: 3,
-                description: "HTTP requests redirect to HTTPS"
-            });
-        }
-        
-        // Meta viewport check (basic responsive design)
-        if (urlLower.includes('mcsarc.com.br') || urlLower.includes('candiottovalle.com.br') || urlLower.includes('zowti.com')) {
-            positiveChecks.push({
-                type: "Mobile Responsive",
-                points: 2,
-                description: "Site has proper viewport meta tag"
-            });
-        }
-        
-        // No critical JavaScript errors (simulated based on site quality)
-        if (!urlLower.includes('candiottovalle.com.br')) { // candiottovalle has ChunkLoadErrors
-            positiveChecks.push({
-                type: "No JS Errors",
-                points: 3,
-                description: "No critical JavaScript errors detected"
-            });
-        }
-        
-        if (urlLower.includes('zowti.com')) {
-            // zowti.com: 85/100 - 2 vulnerabilities
-            vulnerabilities.push({
-                type: "Missing X-XSS-Protection",
-                severity: "medium",
-                description: "Missing X-XSS-Protection - XSS protection"
-            });
-            vulnerabilities.push({
-                type: "Source Code in Response",
-                severity: "low",
-                description: "Response contains Function definition"
-            });
-        } else if (urlLower.includes('mcsarc.com')) {
-            // mcsarc.com: 100/100 - SECURE SITE - No vulnerabilities
-            // This site should have perfect security score
-        } else if (urlLower.includes('other-test-site')) {
-            // Placeholder for other test sites with vulnerabilities
-            vulnerabilities.push({
-                type: "Missing X-Frame-Options",
-                severity: "medium",
-                description: "Missing X-Frame-Options - Clickjacking risk"
-            });
-            vulnerabilities.push({
-                type: "WordPress Version Disclosure",
-                severity: "low",
-                description: "WordPress structure exposed in wp-content paths"
-            });
-            vulnerabilities.push({
-                type: "JavaScript Inline Code",
-                severity: "low",
-                description: "Multiple inline scripts detected"
-            });
-        } else if (urlLower.includes('juridigital.com')) {
-            // juridigital.com: 35/100 - 6 vulnerabilities
-            vulnerabilities.push({
-                type: "Missing Content-Security-Policy",
-                severity: "high",
-                description: "Missing Content-Security-Policy - Script injection risk"
-            });
-            vulnerabilities.push({
-                type: "Missing X-Frame-Options", 
-                severity: "medium",
-                description: "Missing X-Frame-Options - Clickjacking risk"
-            });
-            vulnerabilities.push({
-                type: "Missing X-Content-Type-Options",
-                severity: "medium", 
-                description: "Missing X-Content-Type-Options - MIME sniffing"
-            });
-            vulnerabilities.push({
-                type: "Missing X-XSS-Protection",
-                severity: "medium",
-                description: "Missing X-XSS-Protection - XSS protection"
-            });
-            vulnerabilities.push({
-                type: "Missing HSTS Header",
-                severity: "medium",
-                description: "Missing HSTS Header - HTTPS downgrade attacks"
-            });
-            vulnerabilities.push({
-                type: "Source Code in Response",
-                severity: "low",
-                description: "Response contains Error message"
-            });
-        } else if (urlLower.includes('hhsolucoes.net')) {
-            // hhsolucoes.net: 20/100 - 8 vulnerabilities
-            vulnerabilities.push({
-                type: "Missing Content-Security-Policy",
-                severity: "high",
-                description: "Missing Content-Security-Policy - Script injection risk"
-            });
-            vulnerabilities.push({
-                type: "Missing X-Frame-Options", 
-                severity: "medium",
-                description: "Missing X-Frame-Options - Clickjacking risk"
-            });
-            vulnerabilities.push({
-                type: "Missing X-Content-Type-Options",
-                severity: "medium", 
-                description: "Missing X-Content-Type-Options - MIME sniffing"
-            });
-            vulnerabilities.push({
-                type: "Missing X-XSS-Protection",
-                severity: "medium",
-                description: "Missing X-XSS-Protection - XSS protection"
-            });
-            vulnerabilities.push({
-                type: "Missing HSTS Header",
-                severity: "medium",
-                description: "Missing HSTS Header - HTTPS downgrade attacks"
-            });
-            vulnerabilities.push({
-                type: "Missing HSTS Header",
-                severity: "medium",
-                description: "HTTPS site without HTTP Strict Transport Security"
-            });
-            vulnerabilities.push({
-                type: "Potentially Unsafe JavaScript",
-                severity: "low",
-                description: "JavaScript inline com innerHTML assignment"
-            });
-            vulnerabilities.push({
-                type: "Source Code in Response",
-                severity: "low",
-                description: "Response contains Function definition"
-            });
-        } else if (urlLower.includes('candiottovalle.com')) {
-            // candiottovalle.com: 0/100 - 16 vulnerabilities
-            vulnerabilities.push({
-                type: "Missing CSRF Protection",
-                severity: "high",
-                description: "POST form without CSRF protection detected"
-            });
-            vulnerabilities.push({
-                type: "SQL Injection Risk",
-                severity: "high",
-                description: "Form with potentially vulnerable parameters: post_id, form_id, queried_id"
-            });
-            vulnerabilities.push({
-                type: "Missing Content-Security-Policy",
-                severity: "high",
-                description: "Missing Content-Security-Policy - Script injection risk"
-            });
-            // Add 13 more vulnerabilities...
-            for (let i = 0; i < 13; i++) {
-                vulnerabilities.push({
-                    type: "Additional Security Issue",
-                    severity: i < 7 ? "medium" : "low",
-                    description: `Security vulnerability ${i + 4} detected`
-                });
-            }
+    updateLoadingStatus(message, progress) {
+        this.loadingStatus.textContent = message;
+        this.progressBar.style.width = `${progress}%`;
+    }
+
+    updateScanButton(loading) {
+        if (loading) {
+            this.scanBtn.classList.add('loading');
+            this.scanBtn.disabled = true;
         } else {
-            // Default scan for unknown URLs
-            vulnerabilities.push({
-                type: "Missing Content-Security-Policy",
-                severity: "high",
-                description: "Missing Content-Security-Policy - Script injection risk"
-            });
-            vulnerabilities.push({
-                type: "Missing X-Frame-Options", 
-                severity: "medium",
-                description: "Missing X-Frame-Options - Clickjacking risk"
-            });
+            this.scanBtn.classList.remove('loading');
+            this.scanBtn.disabled = false;
         }
-        
-        return { vulnerabilities, positiveChecks };
     }
 
-    categorizeVulnerabilities(vulnerabilities) {
-        return {
-            critical_high: vulnerabilities.filter(v => v.severity === 'high'),
-            medium: vulnerabilities.filter(v => v.severity === 'medium'),
-            low: vulnerabilities.filter(v => v.severity === 'low')
+    getScoreClass(score) {
+        if (score >= 80) return 'success';
+        if (score >= 60) return 'warning';
+        return 'error';
+    }
+
+    getRiskClass(risk) {
+        const riskMap = {
+            'LOW': 'success',
+            'MEDIUM': 'warning', 
+            'HIGH': 'error',
+            'CRITICAL': 'error'
         };
-    }
-
-    calculateSecurityScore(vulnerabilities, positiveChecks = []) {
-        let score = 0; // Start from 0, build up with positive checks
-        
-        // Add points for positive security implementations
-        positiveChecks.forEach(check => {
-            score += check.points;
-        });
-        
-        // Subtract points for vulnerabilities
-        vulnerabilities.forEach(vuln => {
-            switch(vuln.severity) {
-                case 'high': score -= 25; break;
-                case 'medium': score -= 10; break;
-                case 'low': score -= 5; break;
-            }
-        });
-        
-        return Math.max(0, Math.min(100, score)); // Keep between 0-100
-    }
-
-    getRiskLevel(score) {
-        if (score >= 80) return 'LOW';
-        if (score >= 50) return 'MEDIUM';
-        return 'CRITICAL';
-    }
-
-    displayScanResults(result) {
-        // Store results globally for PDF generation
-        currentScanResult = result;
-        
-        const resultsDiv = document.getElementById('scanResults');
-        const titleEl = document.getElementById('resultTitle');
-        const scoreEl = document.getElementById('securityScore');
-        const vulnListEl = document.getElementById('vulnerabilityList');
-        
-        titleEl.textContent = `Scan Completo - ${result.target}`;
-        
-        const scoreNumber = scoreEl.querySelector('.score-number');
-        scoreNumber.textContent = result.security_score;
-        scoreNumber.style.color = this.getScoreColor(result.security_score);
-        
-        vulnListEl.innerHTML = '';
-        
-        // Display vulnerabilities by category (using real backend data)
-        this.displayVulnCategory(vulnListEl, 'Críticas/High', result.vulnerabilities.critical_high, 'critical');
-        this.displayVulnCategory(vulnListEl, 'Médias/Medium', result.vulnerabilities.medium, 'medium');
-        this.displayVulnCategory(vulnListEl, 'Baixas/Low', result.vulnerabilities.low, 'low');
-        
-        resultsDiv.style.display = 'block';
-        resultsDiv.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    displayPositiveChecks(container, positiveChecks) {
-        const positiveEl = document.createElement('div');
-        positiveEl.innerHTML = `
-            <h4 style="margin: 1rem 0 0.5rem 0; color: #10b981">
-                ✅ Security Configuration Implemented
-            </h4>
-        `;
-        
-        positiveChecks.forEach(check => {
-            const checkEl = document.createElement('div');
-            checkEl.className = 'vulnerability-item good';
-            checkEl.innerHTML = `
-                <strong>${check.type} (+${check.points} points)</strong><br>
-                <span style="opacity: 0.8">${check.description}</span>
-            `;
-            positiveEl.appendChild(checkEl);
-        });
-        
-        container.appendChild(positiveEl);
-    }
-
-    displayVulnCategory(container, title, vulnerabilities, severity) {
-        if (vulnerabilities.length === 0) return;
-        
-        const categoryEl = document.createElement('div');
-        categoryEl.innerHTML = `
-            <h4 style="margin: 1rem 0 0.5rem 0; color: ${this.getSeverityColor(severity)}">
-                ${this.getSeverityIcon(severity)} ${title}
-            </h4>
-        `;
-        
-        // Show only first 2 vulnerabilities as preview
-        const previewCount = 2;
-        const showCount = Math.min(vulnerabilities.length, previewCount);
-        
-        for (let i = 0; i < showCount; i++) {
-            const vuln = vulnerabilities[i];
-            const vulnEl = document.createElement('div');
-            vulnEl.className = `vulnerability-item ${severity}`;
-            vulnEl.innerHTML = `
-                <strong>${vuln.type}</strong><br>
-                <span style="opacity: 0.8">${vuln.description}</span>
-            `;
-            categoryEl.appendChild(vulnEl);
-        }
-        
-        // Add "more vulnerabilities" info if there are more (without detailed report buttons)
-        if (vulnerabilities.length > previewCount) {
-            const moreEl = document.createElement('div');
-            moreEl.className = 'vulnerability-item preview-info';
-            moreEl.innerHTML = `
-                <div style="text-align: center; padding: 1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; margin-top: 0.5rem;">
-                    <strong>+${vulnerabilities.length - previewCount} vulnerabilidades adicionais encontradas</strong><br>
-                    <span style="opacity: 0.9; font-size: 0.9rem;">🔓 Relatório PDF completo com todos os detalhes disponível acima</span>
-                </div>
-            `;
-            categoryEl.appendChild(moreEl);
-        }
-        
-        container.appendChild(categoryEl);
-    }
-
-    getSeverityIcon(severity) {
-        const icons = {
-            critical: '[CRITICAL]',
-            medium: '[MEDIUM]', 
-            low: '[LOW]'
-        };
-        return icons[severity] || '[LOW]';
-    }
-
-    getSeverityColor(severity) {
-        const colors = {
-            critical: '#e74c3c',
-            medium: '#f39c12',
-            low: '#17a2b8'
-        };
-        return colors[severity] || '#17a2b8';
-    }
-
-    getScoreColor(score) {
-        if (score >= 80) return '#27ae60';
-        if (score >= 50) return '#f39c12';
-        return '#e74c3c';
-    }
-
-    startScan() {
-        this.isScanning = true;
-        const btn = document.querySelector('.scan-btn');
-        btn.innerHTML = '<div class="loading"></div> Escaneando...';
-        btn.disabled = true;
-        
-        // Clear any previous error messages when starting a new scan
-        this.hideScanStatus();
-    }
-
-    endScan() {
-        this.isScanning = false;
-        const btn = document.querySelector('.scan-btn');
-        btn.innerHTML = '<i class="fas fa-play"></i> Escanear';
-        btn.disabled = false;
-    }
-
-    showReport(reportKey) {
-        const report = this.reports[reportKey];
-        if (!report) return;
-        
-        document.getElementById('modalTitle').textContent = report.title;
-        document.getElementById('modalContent').innerHTML = `<pre style="white-space: pre-wrap; font-family: 'Courier New', monospace; line-height: 1.6;">${report.details}</pre>`;
-        document.getElementById('reportModal').style.display = 'block';
-    }
-
-    showComparative(comparativeKey) {
-        const comparative = this.comparatives[comparativeKey];
-        if (!comparative) return;
-        
-        document.getElementById('modalTitle').textContent = 'Análise Comparativa Detalhada';
-        document.getElementById('modalContent').innerHTML = `<pre style="white-space: pre-wrap; font-family: 'Courier New', monospace; line-height: 1.6;">${comparative}</pre>`;
-        document.getElementById('reportModal').style.display = 'block';
-    }
-
-    closeModal() {
-        document.getElementById('reportModal').style.display = 'none';
-    }
-
-    isValidDomain(domain) {
-        // Simple domain validation
-        const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9](?:\.[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9])*$/;
-        return domainRegex.test(domain);
-    }
-
-    showAlert(message) {
-        alert(message);
-    }
-
-    delay(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+        return riskMap[risk] || 'info';
     }
 }
 
-// Initialize the application
-const zowtiScan = new ZowTiScanUI();
-
-// Global functions for HTML event handlers
-function scanUrl() {
-    zowtiScan.scanUrl();
-}
-
-function showReport(reportKey) {
-    zowtiScan.showReport(reportKey);
-}
-
-function showComparative(comparativeKey) {
-    zowtiScan.showComparative(comparativeKey);
-}
-
-function closeModal() {
-    zowtiScan.closeModal();
-}
-
-// Event listeners
-document.addEventListener('DOMContentLoaded', function() {
-    // Close modal when clicking outside
-    document.getElementById('reportModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeModal();
-        }
-    });
+// Enhanced CSS for dynamic content
+const dynamicStyles = `
+    <style>
+    .results-display {
+        background: var(--gradient-panel);
+        border: 1px solid var(--border-primary);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-top: 1rem;
+    }
     
-    // Enter key for scan
-    document.getElementById('urlInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter' && !zowtiScan.isScanning) {
-            scanUrl();
-        }
-    });
+    .results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-primary);
+    }
     
-    // Update stats animation
-    // Stats elements not present in current design
-    // setTimeout(() => {
-    //     document.getElementById('totalScans').textContent = '5';
-    //     document.getElementById('totalVulns').textContent = '32';
-    // }, 1000);
+    .results-header h3 {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-primary);
+        margin: 0;
+    }
+    
+    .scan-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        font-family: 'JetBrains Mono', monospace;
+    }
+    
+    .results-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .summary-card {
+        background: var(--bg-input);
+        border: 1px solid var(--border-primary);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+    
+    .summary-card:hover {
+        transform: translateY(-2px);
+    }
+    
+    .summary-score {
+        font-size: 2rem;
+        font-weight: 700;
+        font-family: 'JetBrains Mono', monospace;
+        margin-bottom: 0.5rem;
+    }
+    
+    .summary-score.success { color: var(--cyber-green); }
+    .summary-score.warning { color: var(--cyber-yellow); }
+    .summary-score.error { color: var(--cyber-red); }
+    
+    .summary-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .vulnerability-list h4 {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .no-vulnerabilities {
+        text-align: center;
+        padding: 3rem;
+        color: var(--cyber-green);
+    }
+    
+    .no-vulnerabilities i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    .error-display {
+        text-align: center;
+        padding: 3rem;
+    }
+    
+    .error-icon {
+        font-size: 3rem;
+        color: var(--cyber-red);
+        margin-bottom: 1rem;
+    }
+    
+    .retry-btn {
+        padding: 1rem 2rem;
+        background: var(--gradient-button);
+        border: none;
+        border-radius: 8px;
+        color: var(--bg-primary);
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 1rem auto;
+        transition: transform 0.3s ease;
+    }
+    
+    .retry-btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    .audit-sections {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+    
+    .audit-section h4 {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border-primary);
+    }
+    
+    .performance-summary p {
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary);
+    }
+    
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .metric-item {
+        background: var(--bg-input);
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid var(--border-primary);
+    }
+    
+    .metric-name {
+        display: block;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+    
+    .metric-value {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--cyber-green);
+        font-family: 'JetBrains Mono', monospace;
+    }
+    
+    .vuln-location, .vuln-evidence {
+        margin-top: 0.5rem;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+    
+    .vuln-evidence code {
+        background: var(--bg-tertiary);
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-family: 'JetBrains Mono', monospace;
+    }
+    
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    </style>
+`;
+
+// Initialize the application when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    // Inject dynamic styles
+    document.head.insertAdjacentHTML('beforeend', dynamicStyles);
+    
+    // Initialize the main application
+    window.zowtiCheck = new ZowTiCheckUI();
+    
+    // Add some cybersecurity flair
+    console.log('%c🛡️ ZowTiCheck Security Suite Loaded', 'color: #00ff88; font-size: 16px; font-weight: bold;');
+    console.log('%c⚡ Ready for professional security audits', 'color: #00d4ff; font-size: 12px;');
 });
-
-// Global variable to store current scan results for PDF generation
-let currentScanResult = null;
-
-// PDF Generation Function
-function generatePDFReport() {
-    if (!currentScanResult) {
-        alert('No scan results available. Please run a scan first.');
-        return;
-    }
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    
-    // PDF Configuration
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 20;
-    const lineHeight = 7;
-    let yPosition = margin;
-    
-    // Helper function to add text with word wrap
-    function addText(text, x, y, options = {}) {
-        const maxWidth = options.maxWidth || (pageWidth - 2 * margin);
-        const fontSize = options.fontSize || 12;
-        const color = options.color || [0, 0, 0];
-        
-        doc.setFontSize(fontSize);
-        doc.setTextColor(color[0], color[1], color[2]);
-        
-        const lines = doc.splitTextToSize(text, maxWidth);
-        doc.text(lines, x, y);
-        return y + (lines.length * lineHeight);
-    }
-    
-    // Header with logo and title
-    doc.setFillColor(46, 52, 64); // Primary gray
-    doc.rect(0, 0, pageWidth, 40, 'F');
-    
-    // Company Logo (text-based)
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(24);
-    doc.setFont('helvetica', 'bold');
-    doc.text('ZowTiScan Security Scanner', margin, 25);
-    
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    doc.text('Professional Security Analysis Report', margin, 35);
-    
-    yPosition = 55;
-    
-    // Report Information
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    yPosition = addText('SECURITY ANALYSIS REPORT', margin, yPosition, { fontSize: 16 });
-    yPosition += 5;
-    
-    // Target and timestamp
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    yPosition = addText(`Target: ${currentScanResult.target}`, margin, yPosition);
-    yPosition = addText(`Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`, margin, yPosition);
-    yPosition = addText(`Scan Duration: ${currentScanResult.scan_duration}s`, margin, yPosition);
-    yPosition += 10;
-    
-    // Security Score Section
-    doc.setFont('helvetica', 'bold');
-    yPosition = addText('SECURITY SCORE', margin, yPosition, { fontSize: 14 });
-    yPosition += 5;
-    
-    // Score with color coding
-    const score = currentScanResult.security_score;
-    const scoreColor = score >= 70 ? [39, 174, 96] : score >= 40 ? [243, 156, 18] : [231, 76, 60];
-    
-    doc.setFont('helvetica', 'bold');
-    yPosition = addText(`${score}/100`, margin, yPosition, { fontSize: 20, color: scoreColor });
-    
-    doc.setFont('helvetica', 'normal');
-    const riskLevel = currentScanResult.risk_level;
-    const riskColor = riskLevel === 'LOW' ? [39, 174, 96] : riskLevel === 'MEDIUM' ? [243, 156, 18] : [231, 76, 60];
-    yPosition = addText(`Risk Level: ${riskLevel}`, margin + 60, yPosition - 5, { color: riskColor });
-    yPosition += 15;
-    
-    // Positive Security Implementations
-    if (currentScanResult.positiveChecks && currentScanResult.positiveChecks.length > 0) {
-        doc.setFont('helvetica', 'bold');
-        yPosition = addText('SECURITY IMPLEMENTATIONS', margin, yPosition, { fontSize: 14, color: [39, 174, 96] });
-        yPosition += 5;
-        
-        doc.setFont('helvetica', 'normal');
-        currentScanResult.positiveChecks.forEach(check => {
-            yPosition = addText(`• ${check.type} (+${check.points} points)`, margin + 5, yPosition, { color: [39, 174, 96] });
-            yPosition = addText(`  ${check.description}`, margin + 10, yPosition, { fontSize: 10, color: [100, 100, 100] });
-            yPosition += 2;
-        });
-        yPosition += 10;
-    }
-    
-    // Vulnerabilities Section
-    if (currentScanResult.vulnerabilities) {
-        doc.setFont('helvetica', 'bold');
-        yPosition = addText('VULNERABILITIES DETECTED', margin, yPosition, { fontSize: 14, color: [231, 76, 60] });
-        yPosition += 5;
-        
-        // Critical/High vulnerabilities
-        if (currentScanResult.vulnerabilities.critical_high && currentScanResult.vulnerabilities.critical_high.length > 0) {
-            doc.setFont('helvetica', 'bold');
-            yPosition = addText('HIGH SEVERITY', margin, yPosition, { color: [231, 76, 60] });
-            yPosition += 3;
-            
-            doc.setFont('helvetica', 'normal');
-            currentScanResult.vulnerabilities.critical_high.forEach(vuln => {
-                if (yPosition > pageHeight - 40) {
-                    doc.addPage();
-                    yPosition = margin;
-                }
-                yPosition = addText(`• ${vuln.type}`, margin + 5, yPosition, { color: [231, 76, 60] });
-                yPosition = addText(`  ${vuln.description}`, margin + 10, yPosition, { fontSize: 10, color: [100, 100, 100] });
-                yPosition += 2;
-            });
-            yPosition += 5;
-        }
-        
-        // Medium vulnerabilities
-        if (currentScanResult.vulnerabilities.medium && currentScanResult.vulnerabilities.medium.length > 0) {
-            doc.setFont('helvetica', 'bold');
-            yPosition = addText('MEDIUM SEVERITY', margin, yPosition, { color: [243, 156, 18] });
-            yPosition += 3;
-            
-            doc.setFont('helvetica', 'normal');
-            currentScanResult.vulnerabilities.medium.forEach(vuln => {
-                if (yPosition > pageHeight - 40) {
-                    doc.addPage();
-                    yPosition = margin;
-                }
-                yPosition = addText(`• ${vuln.type}`, margin + 5, yPosition, { color: [243, 156, 18] });
-                yPosition = addText(`  ${vuln.description}`, margin + 10, yPosition, { fontSize: 10, color: [100, 100, 100] });
-                yPosition += 2;
-            });
-            yPosition += 5;
-        }
-        
-        // Low vulnerabilities
-        if (currentScanResult.vulnerabilities.low && currentScanResult.vulnerabilities.low.length > 0) {
-            doc.setFont('helvetica', 'bold');
-            yPosition = addText('LOW SEVERITY', margin, yPosition, { color: [52, 152, 219] });
-            yPosition += 3;
-            
-            doc.setFont('helvetica', 'normal');
-            currentScanResult.vulnerabilities.low.forEach(vuln => {
-                if (yPosition > pageHeight - 40) {
-                    doc.addPage();
-                    yPosition = margin;
-                }
-                yPosition = addText(`• ${vuln.type}`, margin + 5, yPosition, { color: [52, 152, 219] });
-                yPosition = addText(`  ${vuln.description}`, margin + 10, yPosition, { fontSize: 10, color: [100, 100, 100] });
-                yPosition += 2;
-            });
-        }
-    }
-    
-    // Footer
-    const footerY = pageHeight - 15;
-    doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
-    doc.text('Generated by ZowTiScan Professional Security Scanner', margin, footerY);
-    doc.text(`© ${new Date().getFullYear()} ZowTiScan. For authorized professional use only.`, pageWidth - margin - 80, footerY);
-    
-    // Save the PDF
-    const fileName = `ZowTiScan_Report_${currentScanResult.target.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
-    doc.save(fileName);
-}
-
-// Security reminder console log
-console.log('%c🔒 ZowTiScan - SAFE MODE ONLY', 'color: #27ae60; font-size: 16px; font-weight: bold;');
-console.log('%cPassive Analysis Only - No Payload Injection', 'color: #3498db; font-size: 12px;');
-console.log('%cFor authorized testing purposes only', 'color: #e74c3c; font-size: 12px;');

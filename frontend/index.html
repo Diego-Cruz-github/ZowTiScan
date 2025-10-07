@@ -3,27 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZowTiScan - Enterprise Security Scanner</title>
+    <title>ZowTiCheck - Professional Security + Performance + SEO Audit</title>
     <link href="style.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- Background Pattern -->
+    <div class="cyber-bg"></div>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loading-content">
+            <div class="cyber-loader">
+                <div class="loader-ring"></div>
+                <div class="loader-ring"></div>
+                <div class="loader-ring"></div>
+            </div>
+            <div class="loading-text">
+                <span id="loadingStatus">Initializing security scan...</span>
+                <div class="loading-progress">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
     <header class="header">
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <div class="logo-text">
-                        <h1>ZowTiScan</h1>
-                        <span class="tagline">Enterprise Security Scanner</span>
+                    <div class="logo-icon">
+                        <i class="fas fa-shield-alt"></i>
                     </div>
+                    <div class="logo-text">
+                        <h1>ZowTiCheck</h1>
+                        <span class="tagline">Professional Cybersecurity Suite</span>
+                    </div>
+                </div>
+                <div class="header-info">
                     <div class="made-by">
-                        <span class="made-by-text">made by</span>
-                        <div class="zowti-link">
-                            <a href="https://www.zowti.com/" target="_blank" class="zowti-main">ZOWTI</a>
-                            <div class="language-options">
-                                <a href="https://www.zowti.com/" target="_blank" title="Português">PT</a>
-                                <a href="https://www.zowti.com/en/index.html" target="_blank" title="English">EN</a>
-                                <a href="https://www.zowti.com/es/index.html" target="_blank" title="Español">ES</a>
-                            </div>
+                        <span class="made-by-label">Made by</span>
+                        <a href="https://www.diegofontedev.com.br" target="_blank" class="made-by-link">Diego Fonte</a>
+                    </div>
+                    <div class="header-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">20+</span>
+                            <span class="stat-label">Security + Performance + SEO + Patterns</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">4-in-1</span>
+                            <span class="stat-label">Complete Analysis</span>
                         </div>
                     </div>
                 </div>
@@ -31,176 +62,207 @@
         </div>
     </header>
 
+    <!-- Main Content -->
     <main class="main">
         <div class="container">
+            <!-- Hero Section -->
             <section class="hero-section">
                 <div class="hero-content">
-                    <h1 class="hero-title">Professional Web Security Assessment</h1>
-                    <p class="hero-description">Advanced vulnerability scanning and security analysis for enterprise applications</p>
+                    <h1 class="hero-title">
+                        Professional <span class="highlight">Complete Audit</span>
+                        <br>Security + Performance + SEO + Web Patterns
+                    </h1>
+                    <p class="hero-description">
+                        Advanced vulnerability scanning, performance analysis, SEO optimization, and web development patterns 
+                        in a single comprehensive audit. Enterprise-grade security assessment tools.
+                    </p>
+                    <div class="hero-features">
+                        <div class="feature-badge">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>12 Security Modules</span>
+                        </div>
+                        <div class="feature-badge">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span>Core Web Vitals</span>
+                        </div>
+                        <div class="feature-badge">
+                            <i class="fas fa-search"></i>
+                            <span>SEO Intelligence</span>
+                        </div>
+                        <div class="feature-badge">
+                            <i class="fas fa-code"></i>
+                            <span>Web Dev Patterns</span>
+                        </div>
+                    </div>
                 </div>
             </section>
 
+            <!-- Scanner Interface -->
             <section class="scanner-section">
-                <div class="scanner-container">
-                    <div class="scanner-header">
-                        <h2>Security Scanner</h2>
-                        <p>Enter a domain to begin comprehensive security analysis</p>
-                    </div>
-                    
-                    <div class="scanner-form">
-                        <div class="input-group">
-                            <input type="text" id="urlInput" placeholder="example.com" class="url-input" autocomplete="off">
-                            <button onclick="scanUrl()" class="scan-btn">
-                                <span class="button-text">Escanear</span>
-                                <div class="loading-spinner" style="display: none;"></div>
-                            </button>
+                <div class="scanner-grid">
+                    <!-- Input Panel -->
+                    <div class="input-panel">
+                        <div class="panel-header">
+                            <h2><i class="fas fa-crosshairs"></i> Target Configuration</h2>
+                            <p>Configure your security audit parameters</p>
                         </div>
                         
-                        <div class="scan-info">
-                            <span class="info-text">Automated detection of HTTP/HTTPS protocols</span>
-                        </div>
-                        
-                        <div id="scanStatus" class="scan-status" style="display: none;"></div>
-                        
-                        <div class="modules-grid">
-                            <div class="module-group">
-                                <h3>Vulnerability Detection</h3>
-                                <div class="module-items">
-                                    <label class="module-item">
-                                        <input type="checkbox" checked>
-                                        <span>XSS Detection</span>
-                                    </label>
-                                    <label class="module-item">
-                                        <input type="checkbox" checked>
-                                        <span>SQL Injection</span>
-                                    </label>
-                                    <label class="module-item">
-                                        <input type="checkbox" checked>
-                                        <span>NoSQL Injection</span>
-                                    </label>
-                                    <label class="module-item">
-                                        <input type="checkbox" checked>
-                                        <span>CSRF Protection</span>
-                                    </label>
-                                    <label class="module-item">
-                                        <input type="checkbox" checked>
-                                        <span>JavaScript Errors</span>
-                                    </label>
+                        <div class="input-form">
+                            <div class="url-input-group">
+                                <label for="urlInput">
+                                    <i class="fas fa-globe"></i>
+                                    Target URL or Domain
+                                </label>
+                                <div class="input-wrapper">
+                                    <input type="text" id="urlInput" placeholder="Enter domain (e.g., example.com)" class="url-input">
+                                    <button type="button" id="detectBtn" class="detect-btn">
+                                        <i class="fas fa-search"></i>
+                                        <span class="detect-text">Auto-Detect</span>
+                                    </button>
+                                </div>
+                                <div class="protocol-display" id="protocolDisplay"></div>
+                            </div>
+
+                            <div class="scan-type-group">
+                                <label>
+                                    <i class="fas fa-cogs"></i>
+                                    Audit Type
+                                </label>
+                                <div class="scan-type-buttons">
+                                    <button type="button" class="scan-type-btn" data-mode="security">
+                                        <div class="btn-content">
+                                            <i class="fas fa-shield-alt"></i>
+                                            <span class="btn-title">Security</span>
+                                            <span class="btn-desc">12 Modules</span>
+                                        </div>
+                                    </button>
+                                    <button type="button" class="scan-type-btn" data-mode="performance">
+                                        <div class="btn-content">
+                                            <i class="fas fa-tachometer-alt"></i>
+                                            <span class="btn-title">Performance</span>
+                                            <span class="btn-desc">Core Web Vitals</span>
+                                        </div>
+                                    </button>
+                                    <button type="button" class="scan-type-btn" data-mode="seo">
+                                        <div class="btn-content">
+                                            <i class="fas fa-search"></i>
+                                            <span class="btn-title">SEO</span>
+                                            <span class="btn-desc">Optimization</span>
+                                        </div>
+                                    </button>
+                                    <button type="button" class="scan-type-btn" data-mode="web-patterns">
+                                        <div class="btn-content">
+                                            <i class="fas fa-code"></i>
+                                            <span class="btn-title">Web Patterns</span>
+                                            <span class="btn-desc">Dev Standards</span>
+                                        </div>
+                                    </button>
+                                    <button type="button" class="scan-type-btn active" data-mode="full">
+                                        <div class="btn-content">
+                                            <i class="fas fa-star"></i>
+                                            <span class="btn-title">Complete Audit</span>
+                                            <span class="btn-desc">All 4 Modules</span>
+                                        </div>
+                                    </button>
                                 </div>
                             </div>
-                            
-                            <div class="module-group">
-                                <h3>Security Configuration</h3>
-                                <div class="module-items">
-                                    <label class="module-item">
-                                        <input type="checkbox" checked>
-                                        <span>Security Headers</span>
-                                    </label>
-                                    <label class="module-item">
-                                        <input type="checkbox" checked>
-                                        <span>HTTPS Protocol</span>
-                                    </label>
-                                    <label class="module-item">
-                                        <input type="checkbox" checked>
-                                        <span>HTTP→HTTPS Redirect</span>
-                                    </label>
-                                    <label class="module-item">
-                                        <input type="checkbox" checked>
-                                        <span>Authentication</span>
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <div class="module-group">
-                                <h3>Infrastructure Security</h3>
-                                <div class="module-items">
-                                    <label class="module-item">
-                                        <input type="checkbox" checked>
-                                        <span>Access Control</span>
-                                    </label>
-                                    <label class="module-item">
-                                        <input type="checkbox" checked>
-                                        <span>File Upload Security</span>
-                                    </label>
-                                    <label class="module-item">
-                                        <input type="checkbox" checked>
-                                        <span>Meta Viewport</span>
-                                    </label>
-                                    <label class="module-item">
-                                        <input type="checkbox" checked>
-                                        <span>Info Disclosure</span>
-                                    </label>
-                                    <label class="module-item">
-                                        <input type="checkbox" checked>
-                                        <span>Broken Pages/Links</span>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div id="scanResults" class="scan-results" style="display: none;">
-                        <div class="results-header">
-                            <h3 id="resultTitle">Security Analysis Results</h3>
-                            <div class="results-actions">
-                                <div class="security-score" id="securityScore">
-                                    <span class="score-number">0</span>
-                                    <span class="score-label">/100</span>
-                                </div>
-                                <button onclick="generatePDFReport()" class="pdf-btn">
-                                    📄 Generate PDF Report
+
+                            <div class="action-group">
+                                <button type="button" id="scanBtn" class="scan-btn">
+                                    <i class="fas fa-play"></i>
+                                    <span class="scan-text">Initialize Security Scan</span>
+                                    <div class="scan-loader">
+                                        <div class="loader-spinner"></div>
+                                    </div>
                                 </button>
                             </div>
                         </div>
-                        <div id="vulnerabilityList" class="vulnerability-list"></div>
+                    </div>
+
+                    <!-- Results Panel -->
+                    <div class="results-panel">
+                        <div class="panel-header">
+                            <h2><i class="fas fa-chart-line"></i> Live Results</h2>
+                            <div class="panel-actions">
+                                <button class="action-btn" id="exportBtn" disabled>
+                                    <i class="fas fa-download"></i>
+                                    Export
+                                </button>
+                                <button class="action-btn pdf-btn" id="pdfSummaryBtn" disabled onclick="window.zowtiCheck.generatePDFSummary()">
+                                    <i class="fas fa-chart-pie"></i>
+                                    Executive PDF
+                                </button>
+                                <button class="action-btn pdf-btn" id="pdfDetailedBtn" disabled onclick="window.zowtiCheck.generatePDFDetailed()">
+                                    <i class="fas fa-file-alt"></i>
+                                    Technical PDF
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="results-content" id="resultsContent">
+                            <div class="welcome-screen">
+                                <div class="welcome-icon">
+                                    <i class="fas fa-rocket"></i>
+                                </div>
+                                <h3>Ready for Complete Audit</h3>
+                                <p>Enter a target URL and select audit type to begin comprehensive analysis.</p>
+                                <div class="features-preview">
+                                    <div class="feature-item">
+                                        <i class="fas fa-shield-alt"></i>
+                                        <span>Security Vulnerabilities</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-tachometer-alt"></i>
+                                        <span>Performance Metrics</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-search"></i>
+                                        <span>SEO Optimization</span>
+                                    </div>
+                                    <div class="feature-item">
+                                        <i class="fas fa-code"></i>
+                                        <span>Web Development Patterns</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
+
         </div>
     </main>
 
-    <!-- Report Modal -->
-    <div id="reportModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">Detailed Report</h2>
-                <span class="close" onclick="closeModal()">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div id="modalContent"></div>
-            </div>
-        </div>
-    </div>
-
+    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-content">
-                <div class="footer-section">
-                    <h3>ZowTiScan</h3>
-                    <p>Enterprise-grade security scanner for comprehensive vulnerability assessment</p>
+                <div class="footer-brand">
+                    <div class="footer-logo">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>ZowTiCheck</span>
+                    </div>
+                    <p>Professional Security + Performance + SEO + Web Patterns Audit Tool</p>
                 </div>
-                <div class="footer-section">
-                    <h3>Capabilities</h3>
-                    <ul>
-                        <li>• 14 Security Modules</li>
-                        <li>• Professional Reports</li>
-                        <li>• Real-time Analysis</li>
-                        <li>• Detailed Assessment</li>
-                    </ul>
+                <div class="footer-info">
+                    <div class="footer-links">
+                        <a href="https://diegofontedev.com.br" target="_blank">Diego Fonte</a>
+                        <span>×</span>
+                        <a href="https://zowti.com" target="_blank">ZowTi</a>
+                    </div>
+                    <div class="tech-stack">
+                        <span class="tech-item">Python</span>
+                        <span class="tech-item">Flask</span>
+                        <span class="tech-item">Security</span>
+                        <span class="tech-item">Performance</span>
+                        <span class="tech-item">SEO</span>
+                        <span class="tech-item">Web Patterns</span>
+                    </div>
                 </div>
-                <div class="footer-section">
-                    <h3>Contact</h3>
-                    <p>For authorized professional use only</p>
-                    <p>Built with Python & Advanced Testing</p>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 ZowTiScan. Professional Security Analysis Tool.</p>
             </div>
         </div>
     </footer>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

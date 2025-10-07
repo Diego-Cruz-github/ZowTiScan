@@ -29,12 +29,18 @@ class Vulnerability:
 
 
 class SecurityScanner:
-    """Professional security scanner with 8 detection modules"""
+    """Professional security scanner with 12 detection modules"""
     
-    def __init__(self):
+    def __init__(self, config=None):
+        self.config = config
         self.session = requests.Session()
+        
+        # Use config for timeouts if available
+        timeout = getattr(config, 'REQUEST_TIMEOUT', 10) if config else 10
+        self.session.timeout = timeout
+        
         self.session.headers.update({
-            'User-Agent': 'ZowTiScan/1.0 (Security Scanner)'
+            'User-Agent': 'ZowTiCheck/2.1 (Security Scanner)'
         })
     
     def _ping_host(self, hostname: str) -> bool:
@@ -67,8 +73,14 @@ class SecurityScanner:
         for protocol in protocols:
             test_url = f"{protocol}{hostname}"
             try:
-                response = self.session.head(test_url, timeout=10, allow_redirects=True)
-                if response.status_code < 400:
+                # Use GET instead of HEAD since many servers block HEAD requests
+                response = self.session.get(test_url, timeout=10, allow_redirects=True, stream=True)
+                # Only read a small amount to avoid downloading large files
+                response.raw.read(1024, decode_content=True)
+                response.close()
+                # Accept any response that indicates the server is responding
+                # 403 means server is working but blocking access (still a valid connection)
+                if response.status_code < 400 or response.status_code == 403:
                     return test_url
             except Exception:
                 continue
@@ -94,11 +106,98 @@ class SecurityScanner:
             return None, f"Host '{hostname}' is reachable but HTTP/HTTPS services are not responding"
         
         return working_url, None
+    
+    def _detect_technology_context(self, soup: BeautifulSoup, response) -> Dict[str, Any]:
+        """
+        Intelligent technology detection for context-aware vulnerability assessment
+        Reduces false positives by understanding the application stack
+        """
+        context = {
+            'is_wordpress': False,
+            'is_drupal': False,
+            'is_static': False,
+            'is_spa': False,
+            'cms_type': None,
+            'has_database_evidence': False,
+            'javascript_framework': None,
+            'server_technology': response.headers.get('Server', '').lower(),
+            'confidence_level': 'low'
+        }
+        
+        html_content = response.text.lower()
+        
+        # WordPress Detection (high confidence indicators)
+        wordpress_indicators = [
+            'wp-content', 'wp-includes', 'wp-admin', 'wordpress',
+            'wpcf7', 'elementor', 'wp-json', '/wp/', 'wp_nonce'
+        ]
+        wp_score = sum(1 for indicator in wordpress_indicators if indicator in html_content)
+        if wp_score >= 2:
+            context['is_wordpress'] = True
+            context['cms_type'] = 'WordPress'
+            context['confidence_level'] = 'high' if wp_score >= 4 else 'medium'
+        
+        # Drupal Detection
+        drupal_indicators = ['drupal', 'sites/default', '/sites/all/', 'drupal.js']
+        if any(indicator in html_content for indicator in drupal_indicators):
+            context['is_drupal'] = True
+            context['cms_type'] = 'Drupal'
+            context['confidence_level'] = 'medium'
+        
+        # Static Site Detection
+        static_indicators = ['jekyll', 'hugo', 'gatsby', 'netlify', 'github.io']
+        if any(indicator in html_content for indicator in static_indicators):
+            context['is_static'] = True
+            context['cms_type'] = 'Static Site Generator'
+            context['confidence_level'] = 'high'
+        
+        # SPA Detection
+        spa_indicators = ['react', 'angular', 'vue.js', 'spa-', 'single-page']
+        if any(indicator in html_content for indicator in spa_indicators):
+            context['is_spa'] = True
+            context['javascript_framework'] = 'Modern SPA'
+        
+        # Database Evidence Detection (more comprehensive)
+        db_indicators = [
+            'mysql', 'postgresql', 'mongodb', 'redis', 'database error',
+            'sql syntax', 'connection failed', 'query failed', 'sqlite',
+            'phpmyadmin', 'adminer', 'query string', 'db_', 'database_'
+        ]
+        
+        # Look for actual database interaction signs
+        forms = soup.find_all('form')
+        has_search_forms = any(
+            'search' in form.get('action', '').lower() or 
+            any('search' in inp.get('name', '').lower() for inp in form.find_all(['input', 'select', 'textarea']))
+            for form in forms
+        )
+        
+        has_user_forms = any(
+            any(field in inp.get('name', '').lower() for field in ['user', 'login', 'email', 'password'])
+            for form in forms
+            for inp in form.find_all(['input', 'select', 'textarea'])
+        )
+        
+        # WordPress often has database interaction but with secure handling
+        if context['is_wordpress']:
+            # WordPress has database but usually secure - flag only if suspicious patterns
+            context['has_database_evidence'] = (
+                any(indicator in html_content for indicator in db_indicators) or
+                has_search_forms  # WordPress search uses database
+            )
+        else:
+            # Non-WordPress sites - more likely to have unsafe database handling
+            context['has_database_evidence'] = (
+                any(indicator in html_content for indicator in db_indicators) or
+                has_search_forms or has_user_forms
+            )
+        
+        return context
         
     def scan_url(self, url: str, modules: List[str] = None) -> List[Vulnerability]:
         """Main scanning function with smart URL detection"""
         if modules is None:
-            modules = ['xss', 'csrf', 'injection', 'nosql_injection', 'broken_pages', 'headers', 'info_disclosure', 'authentication', 'access_control', 'file_upload']
+            modules = ['xss', 'csrf', 'injection', 'nosql_injection', 'broken_pages', 'headers', 'info_disclosure', 'authentication', 'access_control', 'file_upload', 'tech_stack', 'directory_traversal', 'seo']
             
         vulnerabilities = []
         
@@ -122,15 +221,18 @@ class SecurityScanner:
             response = self.session.get(url, timeout=10)
             soup = BeautifulSoup(response.text, 'html.parser')
             
+            # Detect technology context for intelligent vulnerability assessment
+            context = self._detect_technology_context(soup, response)
+            
             for module in modules:
                 if module == 'xss':
                     vulnerabilities.extend(self._scan_xss(soup, url))
                 elif module == 'csrf':
                     vulnerabilities.extend(self._scan_csrf(soup, url))
                 elif module == 'injection':
-                    vulnerabilities.extend(self._scan_injection(soup, url))
+                    vulnerabilities.extend(self._scan_injection_smart(soup, url, context))
                 elif module == 'nosql_injection':
-                    vulnerabilities.extend(self._scan_nosql_injection(soup, url))
+                    vulnerabilities.extend(self._scan_nosql_injection_smart(soup, url, context))
                 elif module == 'broken_pages':
                     vulnerabilities.extend(self._scan_broken_pages(url))
                 elif module == 'headers':
@@ -143,6 +245,12 @@ class SecurityScanner:
                     vulnerabilities.extend(self._scan_access_control(soup, url))
                 elif module == 'file_upload':
                     vulnerabilities.extend(self._scan_file_upload(soup, url))
+                elif module == 'tech_stack':
+                    vulnerabilities.extend(self._scan_tech_stack(response, soup, url))
+                elif module == 'directory_traversal':
+                    vulnerabilities.extend(self._scan_directory_traversal(url))
+                elif module == 'seo':
+                    vulnerabilities.extend(self._scan_seo(url, response, soup))
                     
         except Exception as e:
             vulnerabilities.append(
@@ -171,7 +279,6 @@ class SecurityScanner:
                         severity="medium",
                         description=f"Input '{input_name}' might be vulnerable to XSS without proper output encoding",
                         location=url,
-                        evidence=str(input_tag)[:100]
                     )
                 )
         
@@ -185,7 +292,6 @@ class SecurityScanner:
                         severity="low",
                         description="JavaScript inline com innerHTML assignment",
                         location=url,
-                        evidence=script.string[:100]
                     )
                 )
                 
@@ -210,7 +316,6 @@ class SecurityScanner:
                             severity="high",
                             description="POST form without CSRF protection detected",
                             location=url,
-                            evidence=str(form)[:200]
                         )
                     )
                     
@@ -237,7 +342,6 @@ class SecurityScanner:
                         severity="high",
                         description=f"Form with potentially vulnerable parameters: {', '.join(suspicious_params)}",
                         location=url,
-                        evidence=str(form)[:200]
                     )
                 )
                 
@@ -273,9 +377,8 @@ class SecurityScanner:
                     Vulnerability(
                         type="NoSQL Injection Risk",
                         severity="high",
-                        description=f"Form with potentially vulnerable NoSQL parameters: {', '.join(suspicious_params)}",
+                        description=f"Form with potentially vulnerable NoSQL parameters: {', '.join(suspicious_params)}. Note: This indicates possible NoSQL database usage.",
                         location=url,
-                        evidence=str(form)[:200]
                     )
                 )
         
@@ -290,10 +393,140 @@ class SecurityScanner:
                         severity="medium",
                         description="NoSQL connection strings or operators found in client-side code",
                         location=url,
-                        evidence=script_text[:150]
                     )
                 )
                 break
+                
+        return vulnerabilities
+    
+    def _scan_injection_smart(self, soup: BeautifulSoup, url: str, context: Dict[str, Any]) -> List[Vulnerability]:
+        """Enhanced SQL/Command injection detection with context awareness"""
+        vulnerabilities = []
+        
+        forms = soup.find_all('form')
+        for form in forms:
+            inputs = form.find_all(['input', 'select', 'textarea'])
+            suspicious_params = []
+            
+            for input_tag in inputs:
+                name = input_tag.get('name', '')
+                input_type = input_tag.get('type', '')
+                
+                # Context-aware parameter analysis
+                is_wordpress_param = any(wp_indicator in name.lower() for wp_indicator in [
+                    'post_id', 'form_id', 'page_id', 'wp_', '_wp', 'wpcf7', 'elementor'
+                ])
+                
+                # Real SQL injection indicators vs WordPress parameters
+                real_sql_indicators = ['id', 'user_id', 'admin_id', 'search', 'query', 'sql', 'cmd', 'exec']
+                has_real_sql_risk = any(keyword in name.lower() for keyword in real_sql_indicators)
+                
+                # Determine if this is a real threat based on context
+                if has_real_sql_risk:
+                    if context['is_wordpress'] and is_wordpress_param:
+                        # WordPress parameter - check if there's actual database evidence
+                        if context['has_database_evidence'] or name.lower() in ['id', 'user_id', 'search']:
+                            # Only flag if there's strong evidence of database interaction
+                            suspicious_params.append(name)
+                    else:
+                        # Non-WordPress or real SQL parameters
+                        suspicious_params.append(name)
+            
+            if suspicious_params:
+                # Adjust severity based on context
+                severity = "medium" if context['is_wordpress'] else "high"
+                
+                # Add context-specific description
+                if context['is_wordpress']:
+                    description = f"WordPress form parameters may be vulnerable to SQL injection: {', '.join(suspicious_params)}. Note: WordPress uses MySQL database for content management."
+                else:
+                    description = f"Form with potentially vulnerable parameters: {', '.join(suspicious_params)}"
+                
+                vulnerabilities.append(
+                    Vulnerability(
+                        type="SQL Injection Risk",
+                        severity=severity,
+                        description=description,
+                        location=url,
+                    )
+                )
+                
+        return vulnerabilities
+    
+    def _scan_nosql_injection_smart(self, soup: BeautifulSoup, url: str, context: Dict[str, Any]) -> List[Vulnerability]:
+        """Enhanced NoSQL injection detection with context awareness"""
+        vulnerabilities = []
+        
+        forms = soup.find_all('form')
+        for form in forms:
+            inputs = form.find_all(['input', 'select', 'textarea'])
+            suspicious_params = []
+            
+            for input_tag in inputs:
+                name = input_tag.get('name', '')
+                input_type = input_tag.get('type', '')
+                
+                # WordPress-specific NoSQL false positives
+                wordpress_nosql_false_positives = [
+                    '_wpcf7_posted_data_hash', '_wpnonce', '_wp_http_referer'
+                ]
+                
+                # Real NoSQL injection indicators
+                real_nosql_patterns = ['mongo', 'document', 'collection', 'query', 'filter', 
+                                     'match', 'aggregate', 'pipeline', 'find', 'search', 
+                                     'json', 'bson', 'redis', 'key', 'hash']
+                
+                is_wordpress_nosql_param = name in wordpress_nosql_false_positives
+                has_real_nosql_risk = any(keyword in name.lower() for keyword in real_nosql_patterns)
+                
+                # Context-aware detection
+                if context['is_wordpress'] and is_wordpress_nosql_param:
+                    # WordPress security parameter - not a real NoSQL injection risk
+                    continue
+                elif has_real_nosql_risk:
+                    suspicious_params.append(name)
+                elif input_type == 'hidden' and '$' in input_tag.get('value', ''):
+                    # Check if it's actually MongoDB operators, not WordPress data
+                    if not context['is_wordpress']:
+                        suspicious_params.append(f"{name} (MongoDB operator detected)")
+                elif 'json' in input_tag.get('class', []) or 'document' in input_tag.get('class', []):
+                    suspicious_params.append(f"{name} (JSON/Document input)")
+            
+            if suspicious_params:
+                # Adjust severity based on context and evidence
+                severity = "medium" if context['is_wordpress'] else "high"
+                
+                # Add context-specific description
+                if context['is_wordpress']:
+                    description = f"WordPress form contains NoSQL-like parameters: {', '.join(suspicious_params)}. Note: WordPress typically uses MySQL, but plugins may use NoSQL databases."
+                else:
+                    description = f"Form with potentially vulnerable NoSQL parameters: {', '.join(suspicious_params)}"
+                
+                vulnerabilities.append(
+                    Vulnerability(
+                        type="NoSQL Injection Risk",
+                        severity=severity,
+                        description=description,
+                        location=url,
+                    )
+                )
+        
+        # Check for exposed MongoDB/Redis endpoints or configurations
+        scripts = soup.find_all('script')
+        for script in scripts:
+            script_text = script.get_text()
+            if any(pattern in script_text.lower() for pattern in ['mongodb://', 'redis://', '$gt', '$lt', '$ne', '$in', '$or']):
+                # Only flag if not WordPress (WordPress uses $ for jQuery, not MongoDB)
+                if not context['is_wordpress'] or any(real_db in script_text.lower() for real_db in ['mongodb://', 'redis://']):
+                    vulnerabilities.append(
+                        Vulnerability(
+                            type="NoSQL Configuration Exposure",
+                            severity="medium",
+                            description="NoSQL connection strings or operators found in client-side code",
+                            location=url,
+                            )
+                    )
+                    break
                 
         return vulnerabilities
     
@@ -321,7 +554,10 @@ class SecurityScanner:
                         href = urljoin(url, href)
                     
                     try:
-                        link_response = requests.head(href, timeout=5, allow_redirects=True)
+                        # Use GET with stream=True instead of HEAD to avoid blocking
+                        link_response = requests.get(href, timeout=5, allow_redirects=True, stream=True)
+                        # Only read headers, don't download content
+                        link_response.close()
                         if link_response.status_code >= 400:
                             broken_links.append(f"{href} ({link_response.status_code})")
                     except:
@@ -343,7 +579,6 @@ class SecurityScanner:
                         severity="medium",
                         description=f"Found {len(broken_links)} broken links that return 404/errors",
                         location=url,
-                        evidence="; ".join(broken_links[:5])  # Show first 5
                     )
                 )
             
@@ -354,7 +589,6 @@ class SecurityScanner:
                         severity="low",
                         description=f"Found {len(inactive_elements)} buttons/elements without proper functionality",
                         location=url,
-                        evidence="; ".join(inactive_elements[:5])
                     )
                 )
                 
@@ -365,7 +599,6 @@ class SecurityScanner:
                     severity="low",
                     description=f"Could not fully analyze page structure: {str(e)}",
                     location=url,
-                    evidence=""
                 )
             )
                 
@@ -512,8 +745,200 @@ class SecurityScanner:
                 
         return vulnerabilities
     
+    def _scan_tech_stack(self, response, soup: BeautifulSoup, url: str) -> List[Vulnerability]:
+        """Technology Stack Fingerprinting"""
+        vulnerabilities = []
+        tech_info = []
+        
+        # Server headers
+        server = response.headers.get('Server', '')
+        if server:
+            tech_info.append(f"Server: {server}")
+            # Check for outdated/vulnerable server versions
+            if any(old_version in server.lower() for old_version in ['apache/2.2', 'nginx/1.0', 'iis/6.0']):
+                vulnerabilities.append(
+                    Vulnerability(
+                        type="Outdated Server Version",
+                        severity="medium",
+                        description=f"Potentially outdated server version detected: {server}",
+                        location=url,
+                    )
+                )
+        
+        # X-Powered-By header
+        powered_by = response.headers.get('X-Powered-By', '')
+        if powered_by:
+            tech_info.append(f"Powered-By: {powered_by}")
+            vulnerabilities.append(
+                Vulnerability(
+                    type="Information Disclosure in Headers",
+                    severity="low",
+                    description=f"X-Powered-By header reveals technology: {powered_by}",
+                    location=url,
+                )
+            )
+        
+        # Framework detection in HTML
+        html_content = soup.get_text().lower()
+        frameworks = {
+            'wordpress': ['wp-content', 'wp-includes', 'wp-admin'],
+            'drupal': ['drupal', 'sites/default'],
+            'joomla': ['joomla', 'administrator'],
+            'django': ['django', 'csrfmiddlewaretoken'],
+            'laravel': ['laravel_session', '_token'],
+            'react': ['react', 'react-dom'],
+            'angular': ['angular', 'ng-app'],
+            'vue': ['vue.js', 'v-for', 'v-if']
+        }
+        
+        for framework, indicators in frameworks.items():
+            if any(indicator in html_content for indicator in indicators):
+                tech_info.append(f"Framework: {framework.title()}")
+        
+        # META tags analysis
+        meta_tags = soup.find_all('meta')
+        for meta in meta_tags:
+            generator = meta.get('name')
+            if generator == 'generator':
+                content = meta.get('content', '')
+                if content:
+                    tech_info.append(f"Generator: {content}")
+                    vulnerabilities.append(
+                        Vulnerability(
+                            type="Technology Disclosure in Meta Tags",
+                            severity="low",
+                            description=f"Meta generator reveals technology: {content}",
+                            location=url,
+                        )
+                    )
+        
+        # JavaScript libraries detection
+        script_tags = soup.find_all('script', src=True)
+        js_libraries = []
+        for script in script_tags:
+            src = script.get('src', '')
+            if 'jquery' in src.lower():
+                js_libraries.append('jQuery')
+            elif 'bootstrap' in src.lower():
+                js_libraries.append('Bootstrap')
+            elif 'angular' in src.lower():
+                js_libraries.append('Angular')
+            elif 'react' in src.lower():
+                js_libraries.append('React')
+        
+        if js_libraries:
+            tech_info.append(f"JS Libraries: {', '.join(js_libraries)}")
+        
+        # Add technology stack as informational finding
+        if tech_info:
+            vulnerabilities.append(
+                Vulnerability(
+                    type="Technology Stack Detected",
+                    severity="info",
+                    description=f"Detected technologies: {'; '.join(tech_info)}",
+                    location=url,
+                )
+            )
+        
+        return vulnerabilities
+    
+    def _scan_directory_traversal(self, url: str) -> List[Vulnerability]:
+        """Directory Traversal Detection"""
+        vulnerabilities = []
+        
+        # Common sensitive paths to test
+        sensitive_paths = [
+            '/etc/passwd',
+            '/etc/hosts',
+            '/etc/shadow',
+            '/.env',
+            '/.git/',
+            '/.git/config',
+            '/config.json',
+            '/admin/',
+            '/administrator/',
+            '/wp-admin/',
+            '/phpmyadmin/',
+            '/backup/',
+            '/logs/',
+            '/test/',
+            '/dev/',
+            '/temp/',
+            '/tmp/',
+            '/uploads/',
+            '/files/',
+            '/private/',
+            '/secret/'
+        ]
+        
+        # Parse base URL
+        parsed_url = urlparse(url)
+        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        
+        accessible_paths = []
+        
+        for path in sensitive_paths:
+            try:
+                test_url = base_url + path
+                # Use GET with stream=True to avoid HEAD blocking issues
+                response = self.session.get(test_url, timeout=5, allow_redirects=False, stream=True)
+                response.close()  # Don't download content, just check status
+                
+                # Check for accessible paths (not 404, 403, etc.)
+                if response.status_code in [200, 301, 302]:
+                    accessible_paths.append(path)
+                    
+                    # Determine severity based on path sensitivity
+                    severity = "high"
+                    if path in ['/etc/passwd', '/etc/shadow', '/.env', '/.git/config']:
+                        severity = "high"
+                    elif path in ['/admin/', '/administrator/', '/wp-admin/', '/phpmyadmin/']:
+                        severity = "medium"
+                    else:
+                        severity = "low"
+                    
+                    vulnerabilities.append(
+                        Vulnerability(
+                            type="Directory/File Accessible",
+                            severity=severity,
+                            description=f"Sensitive path accessible: {path} (HTTP {response.status_code})",
+                            location=test_url,
+                        )
+                    )
+                    
+            except Exception:
+                # Ignore connection errors for individual paths
+                continue
+        
+        # Check for directory listing
+        try:
+            # Test common directories that might have listing enabled
+            test_dirs = ['/uploads/', '/files/', '/images/', '/documents/', '/backup/']
+            for test_dir in test_dirs:
+                test_url = base_url + test_dir
+                response = self.session.get(test_url, timeout=5)
+                
+                if (response.status_code == 200 and 
+                    ('Index of' in response.text or 
+                     '<title>Directory listing' in response.text or
+                     'Parent Directory' in response.text)):
+                    
+                    vulnerabilities.append(
+                        Vulnerability(
+                            type="Directory Listing Enabled",
+                            severity="medium",
+                            description=f"Directory listing enabled at: {test_dir}",
+                            location=test_url,
+                        )
+                    )
+                    
+        except Exception:
+            pass
+        
+        return vulnerabilities
+    
     def calculate_security_score(self, vulnerabilities: List[Vulnerability], url: str = "") -> int:
-        """Calculate security score based on vulnerabilities and positive security measures"""
+        """Calculate hybrid security score: ZowTi analysis + Best Practices"""
         # Check for connection errors first
         connection_errors = [v for v in vulnerabilities if v.type == "Connection Error"]
         if connection_errors:
@@ -598,6 +1023,9 @@ class SecurityScanner:
         # FINAL SCORE = BASE POINTS - PENALTIES (but base points are protected)
         final_score = base_score - vulnerability_penalties
         
+        # PURE ZOWTI SECURITY SCORING
+        # Removed Best Practices integration - now handled as separate module
+        
         # ENSURE MINIMUM SCORE REFLECTS BASIC SECURITY MEASURES
         # If site has HTTPS, minimum score should be at least 10
         minimum_score = 15 if url.startswith('https://') else 5
@@ -653,7 +1081,271 @@ class SecurityScanner:
             },
             "scan_timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
         }
+    
+    def get_risk_level(self, vulnerabilities: List[Vulnerability]) -> str:
+        """Get risk level based on vulnerabilities"""
+        if not vulnerabilities:
+            return "LOW"
+        
+        severity_counts = self.get_vulnerabilities_by_severity(vulnerabilities)
+        
+        if severity_counts.get('critical', 0) > 0:
+            return "CRITICAL"
+        elif severity_counts.get('high', 0) >= 3:
+            return "CRITICAL"
+        elif severity_counts.get('high', 0) > 0:
+            return "HIGH"
+        elif severity_counts.get('medium', 0) >= 5:
+            return "HIGH"
+        elif severity_counts.get('medium', 0) > 0:
+            return "MEDIUM"
+        else:
+            return "LOW"
+    
+    def get_vulnerabilities_by_severity(self, vulnerabilities: List[Vulnerability]) -> Dict[str, int]:
+        """Get vulnerability count by severity"""
+        by_severity = {'critical': 0, 'high': 0, 'medium': 0, 'low': 0, 'info': 0}
+        
+        for vuln in vulnerabilities:
+            severity = vuln.severity.lower()
+            if severity in by_severity:
+                by_severity[severity] += 1
+        
+        return by_severity
+    
+    def _scan_best_practices(self, url: str) -> List[Vulnerability]:
+        """
+        Best Practices Analysis Module - Security Enhancement
+        
+        Senior Engineering: Integrate industry best practices validation
+        Convert Best Practices issues to vulnerability format for unified reporting
+        """
+        vulnerabilities = []
+        
+        try:
+            # Import the Best Practices function from app.py
+            from app import get_pagespeed_best_practices_data
+            
+            # Get Best Practices data
+            best_practices_data = get_pagespeed_best_practices_data(url)
+            
+            # Handle API errors
+            if 'error' in best_practices_data:
+                vulnerabilities.append(
+                    Vulnerability(
+                        type="Best Practices: API Error",
+                        severity="info",
+                        description=f"Unable to get Best Practices data: {best_practices_data['error']}",
+                        location="Best Practices Analysis",
+                    )
+                )
+                return vulnerabilities
+            
+            # Convert Best Practices issues to vulnerability format
+            for issue in best_practices_data.get('issues', []):
+                # Map Best Practices severity to vulnerability severity  
+                severity_mapping = {
+                    'high': 'medium',        # High BP issues are medium security priority
+                    'medium': 'low',         # Medium BP issues are low security priority
+                    'low': 'info'           # Low BP issues are informational
+                }
+                
+                vulnerabilities.append(
+                    Vulnerability(
+                        type=f"Best Practices: {issue.get('type', 'Security Issue')}",
+                        severity=severity_mapping.get(issue.get('severity', 'low'), 'info'),
+                        description=issue.get('description', 'Security best practice issue detected'),
+                        location="Security Best Practices Analysis",
+                    )
+                )
+            
+            # Add overall Best Practices score if low
+            best_practices_score = best_practices_data.get('best_practices_score', 100)
+            if best_practices_score < 80:
+                vulnerabilities.append(
+                    Vulnerability(
+                        type="Best Practices: Low Security Score",
+                        severity="low",
+                        description=f"Security best practices score is {best_practices_score}/100 (below recommended 80+)",
+                        location="Overall security posture",
+                    )
+                )
+                
+        except Exception as e:
+            vulnerabilities.append(
+                Vulnerability(
+                    type="Best Practices Analysis Error",
+                    severity="info",
+                    description=f"Security best practices analysis failed: {str(e)}",
+                    location="Security Module",
+                )
+            )
+        
+        return vulnerabilities
+    
+    def _scan_seo(self, url: str, response, soup: BeautifulSoup) -> List[Vulnerability]:
+        """
+        SEO Analysis Module - Google PageSpeed Integration
+        
+        Senior Engineering: Use Google PageSpeed API for consistent scoring
+        Convert Google SEO issues to vulnerability format for unified reporting
+        """
+        vulnerabilities = []
+        
+        try:
+            # Import the Google PageSpeed SEO function from app.py
+            from app import get_pagespeed_seo_data
+            
+            # Get SEO data from Google PageSpeed API
+            seo_data = get_pagespeed_seo_data(url)
+            
+            # Handle API errors
+            if 'error' in seo_data:
+                vulnerabilities.append(
+                    Vulnerability(
+                        type="SEO: API Error",
+                        severity="info",
+                        description=f"Unable to get Google PageSpeed SEO data: {seo_data['error']}",
+                        location="Google PageSpeed API",
+                    )
+                )
+                return vulnerabilities
+            
+            # Convert Google PageSpeed SEO issues to vulnerability format
+            for issue in seo_data.get('issues', []):
+                # Map Google PageSpeed severity to vulnerability severity
+                severity_mapping = {
+                    'high': 'medium',        # High SEO issues are medium security priority
+                    'medium': 'low',         # Medium SEO issues are low security priority
+                    'low': 'info'           # Low SEO issues are informational
+                }
+                
+                vulnerabilities.append(
+                    Vulnerability(
+                        type=f"SEO: {issue.get('type', 'Optimization Issue')}",
+                        severity=severity_mapping.get(issue.get('severity', 'low'), 'info'),
+                        description=issue.get('description', 'SEO optimization issue detected'),
+                        location="Google PageSpeed Analysis",
+                    )
+                )
+            
+            # Add SEO score as informational finding if score is low
+            seo_score = seo_data.get('seo_score', 100)
+            if seo_score < 70:
+                vulnerabilities.append(
+                    Vulnerability(
+                        type="SEO: Low Optimization Score",
+                        severity="low",
+                        description=f"SEO score is {seo_score}/100 (below recommended 70+)",
+                        location="Overall page",
+                    )
+                )
+                
+        except Exception as e:
+            vulnerabilities.append(
+                Vulnerability(
+                    type="SEO Analysis Error",
+                    severity="info",
+                    description=f"SEO analysis failed: {str(e)}",
+                    location="SEO Module",
+                )
+            )
+        
+        return vulnerabilities
 
+
+# Color formatting for better presentation
+class Colors:
+    """ANSI color codes for terminal output"""
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+    
+    # Risk level colors
+    CRITICAL = '\033[95m'  # Magenta
+    HIGH = '\033[91m'     # Red
+    MEDIUM = '\033[93m'   # Yellow
+    LOW = '\033[92m'      # Green
+    
+    @staticmethod
+    def disable():
+        """Disable colors (for Windows or when needed)"""
+        Colors.HEADER = ''
+        Colors.OKBLUE = ''
+        Colors.OKCYAN = ''
+        Colors.OKGREEN = ''
+        Colors.WARNING = ''
+        Colors.FAIL = ''
+        Colors.ENDC = ''
+        Colors.BOLD = ''
+        Colors.UNDERLINE = ''
+        Colors.CRITICAL = ''
+        Colors.HIGH = ''
+        Colors.MEDIUM = ''
+        Colors.LOW = ''
+
+def print_banner():
+    """Print professional banner"""
+    banner = f"""{Colors.OKCYAN}{Colors.BOLD}
+╔══════════════════════════════════════════════════════════════╗
+║                        🛡️  ZowTiScan v2.0                    ║
+║                    Professional Security Scanner              ║
+║                      🔍 Scanning in progress...              ║
+╚══════════════════════════════════════════════════════════════╝{Colors.ENDC}
+"""
+    print(banner)
+
+def get_risk_emoji(risk_level):
+    """Get emoji for risk level"""
+    risk_emojis = {
+        'CRITICAL': '🚨',
+        'HIGH': '⚠️',
+        'MEDIUM': '⚡',
+        'LOW': '✅',
+        'CONNECTION_ERROR': '❌'
+    }
+    return risk_emojis.get(risk_level, '❓')
+
+def get_risk_color(risk_level):
+    """Get color for risk level"""
+    risk_colors = {
+        'CRITICAL': Colors.CRITICAL,
+        'HIGH': Colors.HIGH,
+        'MEDIUM': Colors.MEDIUM,
+        'LOW': Colors.LOW,
+        'CONNECTION_ERROR': Colors.FAIL
+    }
+    return risk_colors.get(risk_level, '')
+
+def format_score_display(score, risk_level):
+    """Format security score with colors and styling"""
+    emoji = get_risk_emoji(risk_level)
+    color = get_risk_color(risk_level)
+    
+    if score == 'N/A':
+        return f"{Colors.FAIL}❌ Connection Error{Colors.ENDC}"
+    
+    score_bar = "█" * (score // 10) + "░" * (10 - score // 10)
+    return f"{color}{emoji} Security Score: {score}/100{Colors.ENDC} {Colors.BOLD}[{score_bar}]{Colors.ENDC} {color}({risk_level}){Colors.ENDC}"
+
+def print_vulnerability_section(title, vulnerabilities, color, icon):
+    """Print formatted vulnerability section"""
+    if not vulnerabilities:
+        return
+        
+    print(f"\n{color}{Colors.BOLD}{icon} {title.upper()} ISSUES:{Colors.ENDC}")
+    print(f"{color}{'─' * 50}{Colors.ENDC}")
+    
+    for i, vuln in enumerate(vulnerabilities, 1):
+        print(f"{color}  {i:2d}.{Colors.ENDC} {Colors.BOLD}{vuln['type']}{Colors.ENDC}")
+        print(f"      {vuln['description']}")
+        print()
 
 def main():
     """CLI interface for ZowTiScan"""
@@ -665,28 +1357,39 @@ def main():
         import codecs
         sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'replace')
         sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'replace')
+        # Disable colors on Windows for better compatibility
+        Colors.disable()
     
     parser = argparse.ArgumentParser(description='ZowTiScan - Professional Security Scanner')
     parser.add_argument('url', help='Target URL to scan')
     parser.add_argument('--modules', '-m', 
-                       choices=['xss', 'csrf', 'injection', 'nosql_injection', 'broken_pages', 'headers', 'info_disclosure', 'authentication', 'access_control', 'file_upload', 'all'],
+                       choices=['xss', 'csrf', 'injection', 'nosql_injection', 'broken_pages', 'headers', 'info_disclosure', 'authentication', 'access_control', 'file_upload', 'tech_stack', 'directory_traversal', 'all'],
                        nargs='+', default=['all'],
                        help='Security modules to run')
     parser.add_argument('--format', '-f', choices=['json', 'text'], default='text',
                        help='Output format')
+    parser.add_argument('--no-color', action='store_true', help='Disable colored output')
     
     args = parser.parse_args()
     
+    if args.no_color:
+        Colors.disable()
+    
     if 'all' in args.modules:
-        modules = ['xss', 'csrf', 'injection', 'nosql_injection', 'broken_pages', 'headers', 'info_disclosure', 'authentication', 'access_control', 'file_upload']
+        modules = ['xss', 'csrf', 'injection', 'nosql_injection', 'broken_pages', 'headers', 'info_disclosure', 'authentication', 'access_control', 'file_upload', 'tech_stack', 'directory_traversal', 'seo']
     else:
         modules = args.modules
     
+    # Print banner for text format
+    if args.format == 'text':
+        print_banner()
+        print(f"{Colors.OKCYAN}🌐 Target:{Colors.ENDC} {Colors.BOLD}{args.url}{Colors.ENDC}")
+        print(f"{Colors.OKCYAN}🔍 Modules:{Colors.ENDC} {len(modules)} security modules")
+        print(f"{Colors.OKCYAN}⏱️  Starting analysis...{Colors.ENDC}")
+        print()
+    
     scanner = SecurityScanner()
     start_time = time.time()
-    
-    print(f"ZowTiScan - Scanning {args.url}")
-    print("=" * 60)
     
     vulnerabilities = scanner.scan_url(args.url, modules)
     duration = time.time() - start_time
@@ -696,30 +1399,68 @@ def main():
         report['scan_duration'] = round(duration, 2)
         print(json.dumps(report, indent=2))
     else:
-        # Text format (like your example)
+        # Enhanced text format
         report = scanner.generate_report(args.url, vulnerabilities)
         
-        print(f"Security Score: {report['security_score']}/100 ({report['risk_level']})")
-        print(f"Vulnerabilities found: {report['total_vulnerabilities']} issues")
-        print(f"Scan duration: {duration:.2f} seconds")
+        # Handle connection errors
+        if 'connection_error' in report:
+            print(f"{Colors.FAIL}❌ CONNECTION ERROR:{Colors.ENDC}")
+            print(f"   {report['connection_error']}")
+            return
+        
+        print(f"{Colors.OKGREEN}{'═' * 70}{Colors.ENDC}")
+        print(f"{Colors.BOLD}📊 SCAN RESULTS{Colors.ENDC}")
+        print(f"{Colors.OKGREEN}{'═' * 70}{Colors.ENDC}")
         print()
         
-        if report['vulnerabilities']['critical_high']:
-            print("CRITICAL/HIGH:")
-            for i, vuln in enumerate(report['vulnerabilities']['critical_high'], 1):
-                print(f"{i}. {vuln['type']} - {vuln['description']}")
-            print()
-            
-        if report['vulnerabilities']['medium']:
-            print("MEDIUM:")
-            for i, vuln in enumerate(report['vulnerabilities']['medium'], len(report['vulnerabilities']['critical_high']) + 1):
-                print(f"{i}. {vuln['type']} - {vuln['description']}")
-            print()
-            
-        if report['vulnerabilities']['low']:
-            print("LOW:")
-            for i, vuln in enumerate(report['vulnerabilities']['low'], len(report['vulnerabilities']['critical_high']) + len(report['vulnerabilities']['medium']) + 1):
-                print(f"{i}. {vuln['type']} - {vuln['description']}")
+        # Security score with visual bar
+        print(format_score_display(report['security_score'], report['risk_level']))
+        
+        # Vulnerability summary
+        total_vulns = report['total_vulnerabilities']
+        vuln_emoji = "🔐" if total_vulns == 0 else "⚠️"
+        print(f"{Colors.OKCYAN}{vuln_emoji} Vulnerabilities found:{Colors.ENDC} {Colors.BOLD}{total_vulns} issues{Colors.ENDC}")
+        
+        # Scan info
+        print(f"{Colors.OKCYAN}📋 Scan duration:{Colors.ENDC} {Colors.BOLD}{duration:.2f} seconds{Colors.ENDC}")
+        print(f"{Colors.OKCYAN}🔍 Modules analyzed:{Colors.ENDC} {Colors.BOLD}{len(modules)} security checks{Colors.ENDC}")
+        
+        # Module status indicator
+        status_color = Colors.OKGREEN if total_vulns == 0 else Colors.WARNING
+        status_icon = "✅" if total_vulns == 0 else "📊"
+        print(f"{status_color}{status_icon} Analysis complete!{Colors.ENDC}")
+        
+        # Professional footer
+        if args.format == 'text':
+            print(f"\n{Colors.OKCYAN}📄 Professional report generated{Colors.ENDC}")
+            if total_vulns > 0:
+                print(f"{Colors.OKCYAN}📊 JSON data available with --format json{Colors.ENDC}")
+            print(f"{Colors.OKCYAN}🚀 Powered by ZowTiScan Security Framework{Colors.ENDC}")
+        
+        # Vulnerability sections
+        print_vulnerability_section(
+            "🚨 Critical/High", 
+            report['vulnerabilities']['critical_high'], 
+            Colors.CRITICAL, 
+            "🚨"
+        )
+        
+        print_vulnerability_section(
+            "⚠️ Medium", 
+            report['vulnerabilities']['medium'], 
+            Colors.MEDIUM, 
+            "⚠️"
+        )
+        
+        print_vulnerability_section(
+            "⚡ Low", 
+            report['vulnerabilities']['low'], 
+            Colors.LOW, 
+            "⚡"
+        )
+        
+        # Final separator
+        print(f"\n{Colors.OKGREEN}{'═' * 70}{Colors.ENDC}")
 
 
 if __name__ == "__main__":

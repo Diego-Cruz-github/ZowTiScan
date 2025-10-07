@@ -1,138 +1,171 @@
-# 🔒 ZowTiScan - Professional Security Scanner
+# 🔒 ZowTiCheck - Professional Security & Performance Scanner
 
-Clean, fast, and effective web security scanner with 14 detection modules.
+Auditoria completa de segurança, performance, SEO e web patterns para sites e aplicações web.
 
-## Features
+## 🚀 Principais Recursos
 
-- **14 Security Modules**: XSS, CSRF, SQL Injection, NoSQL Injection, Headers, Broken Pages/Links, Info Disclosure, Authentication, Access Control, File Upload
-- **REST API**: Complete programmatic access via JSON endpoints
-- **Professional Reports**: Detailed PDF, JSON and formatted text reports
-- **Fast Scanning**: Complete analysis in ~1 second
-- **Safe Mode**: No payloads injected, passive analysis only
-- **Real TDD**: Comprehensive pytest test suite
-- **Debug Support**: Development PIN available for troubleshooting
+- **12+ Módulos de Segurança**: XSS, CSRF, SQL/NoSQL Injection, Headers, Authentication, Access Control
+- **Performance Analysis**: Core Web Vitals desktop/mobile via Google PageSpeed API
+- **SEO Optimization**: Meta tags, estrutura HTML e otimizações
+- **Web Patterns**: Análise de padrões de desenvolvimento web
+- **REST API**: Integração completa via endpoints JSON
+- **Relatórios Profissionais**: PDF executivo, técnico e JSON
+- **Auto-detect HTTP/HTTPS**: Detecção automática de protocolo
+- **CLI + Library**: Uso via linha de comando ou como biblioteca Python
 
 ## 📸 Demonstração
 
-![ZowTiScan Demo](Demonstração/Gravando-2025-09-29-115632.gif)
+![ZowTiCheck Demo](ss/Gravando-2025-10-07-140124.gif)
 
-*Professional web security scanning in action - Real-time vulnerability detection with detailed reporting*
+*Auditoria quádrupla em ação: segurança + performance + SEO + web patterns*
 
-## Installation
+**URL de demonstração**: testphp.vulnweb.com - Site de testes da Acunetix com vulnerabilidades intencionais (SQL Injection, XSS, falhas de configuração HTTP) para demonstrar a eficácia do scanner
+
+## 💻 Stack Tecnológica
+
+**Backend:**
+- Python 3.8+ com Flask
+- requests, BeautifulSoup4, pydantic
+- Google PageSpeed Insights API
+- reportlab para relatórios PDF
+
+**Frontend:**
+- HTML5, CSS3, JavaScript vanilla
+- Interface responsiva e moderna
+
+**APIs:**
+- REST API completa
+- Google PageSpeed Insights integration
+- Auto-detect HTTP/HTTPS
+
+## 🛠️ Instalação
 
 ```bash
+# Clone o repositório
+git clone https://github.com/seu-usuario/ZowTiCheck.git
+cd ZowTiCheck
+
+# Instale as dependências
 pip install -r requirements.txt
+
+# Configure as variáveis de ambiente (opcional)
+cp .env.example .env
 ```
 
-## Usage
+## 📖 Uso
 
-### Command Line
+### Linha de Comando
 ```bash
-# Scan all modules
-python scanner.py https://example.com
+# Auditoria completa (segurança + performance + SEO + web patterns)
+python scanner.py https://exemplo.com --audit
 
-# Scan specific modules
-python scanner.py https://example.com --modules xss csrf injection nosql_injection headers
+# Apenas segurança
+python scanner.py https://exemplo.com --security
 
-# JSON output
-python scanner.py https://example.com --format json
+# Formato JSON
+python scanner.py https://exemplo.com --audit --format json
 ```
 
-### As Library
+### Como Biblioteca Python
 ```python
 from scanner import SecurityScanner
 
 scanner = SecurityScanner()
-vulnerabilities = scanner.scan_url('https://example.com')
-report = scanner.generate_report('https://example.com', vulnerabilities)
+result = scanner.audit_complete('https://exemplo.com')
+print(f"Security: {result['security_score']}/100")
+print(f"Performance: {result['performance_score']}/100")
 ```
 
-### REST API Integration
+### API REST
 ```bash
-# Start the web server
+# Iniciar servidor
 python app.py
 
-# API endpoint available at:
-POST http://localhost:5000/api/scan
-Content-Type: application/json
-
-{"url": "https://example.com"}
+# Auditoria completa
+curl -X POST http://localhost:5000/api/audit \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://exemplo.com"}'
 ```
 
-```python
-# Python API integration
-import requests
-
-response = requests.post('http://localhost:5000/api/scan', 
-                        json={'url': 'https://example.com'})
-result = response.json()
-print(f"Security Score: {result['security_score']}/100")
-```
-
-## Example Output
+## 📊 Exemplo de Saída
 
 ```
-ZowTiScan - Scanning https://example.com
+ZowTiCheck - Auditing https://exemplo.com
 ============================================================
-Security Score: 45/100 (HIGH RISK)
-Vulnerabilities found: 8 issues
-Scan duration: 1.13 seconds
+✅ Security Score: 67/100 (MEDIUM RISK)
+⚡ Performance Score: 89/100 (GOOD)
+🔍 SEO Score: 82/100 (GOOD)
+🌐 Web Patterns Score: 91/100 (EXCELLENT)
 
-CRITICAL/HIGH:
-1. Missing CSRF Protection - POST form without CSRF protection detected
-2. SQL Injection Risk - Form with potentially vulnerable parameters: user_id, post_id
+⚠️ Vulnerabilities found: 5 issues
+📋 Quadruple audit: 3.8 seconds
 
-MEDIUM:
-3. Missing Content-Security-Policy - Script injection risk
-4. Missing X-Frame-Options - Clickjacking risk
-5. Missing HSTS Header - HTTPS downgrade attacks
-
-LOW:
-6. Potential XSS Input - Input 'comment' might be vulnerable to XSS
-7. Source Code in Response - Response contains Function definition
-8. Potentially Unsafe JavaScript - JavaScript inline com innerHTML assignment
+CRITICAL:
+🔍 Missing CSRF Protection - POST form vulnerability
+⚡ MEDIUM: Missing meta description (SEO impact)
 ```
 
-## Testing
+## 🔧 Funcionalidades Principais
 
-```bash
-# Run all tests
-pytest tests/ -v
+### Módulos de Segurança (12+)
+- **Web Application Security**: Detecção de vulnerabilidades comuns
+- **Session Security**: Validação de segurança de sessões  
+- **Injection Vulnerabilities**: Sistema de detecção avançado
+- **HTTP Security**: Análise de configurações de segurança
+- **Information Security**: Detecção de exposição de dados
+- **Resource Validation**: Verificação de recursos e links
+- **Access Control**: Validação de controles de acesso
+- **File Security**: Verificação de segurança em uploads
 
-# Run specific test
-pytest tests/test_scanner.py::TestSecurityScanner::test_xss_detection -v
-```
+### Performance + SEO + Web Patterns
+- **Core Web Vitals**: Desktop e mobile via Google PageSpeed
+- **SEO Analysis**: Meta tags e estrutura HTML
+- **Page Speed Insights**: Integração completa com Google API
+- **Web Patterns**: Padrões de desenvolvimento web modernos
 
-## Modules
+### Enterprise Integration
+- **API REST**: Endpoints para auditoria automática
+- **CI/CD Integration**: Integração com pipelines de desenvolvimento
+- **Executive Reports**: Relatórios profissionais automatizados
+- **Multi-format Output**: PDF, JSON, texto
 
-| Module | Description | Detects |
-|--------|-------------|---------|
-| **XSS** | Cross-Site Scripting | Unsafe inputs, innerHTML usage |
-| **CSRF** | Cross-Site Request Forgery | Missing CSRF tokens |
-| **SQL Injection** | SQL Database Attacks | Suspicious SQL parameters |
-| **NoSQL Injection** | NoSQL Database Attacks | MongoDB, Redis vulnerabilities |
-| **Headers** | Security Headers | Missing CSP, HSTS, X-Frame-Options |
-| **Broken Pages** | Link Validation | 404s, inactive elements |
-| **Info Disclosure** | Information Leaks | Error messages, debug info |
-| **Authentication** | Auth Security | Weak password policies |
-| **Access Control** | Authorization | Directory listing |
-| **File Upload** | Upload Security | Unrestricted uploads |
+## 🌟 Diferenciais
 
-## Development & Support
+- ✅ **Auditoria 4 em 1**: Segurança + Performance + SEO + Web Patterns
+- ✅ **Desktop + Mobile**: Análise separada para diferentes dispositivos
+- ✅ **Auto-detect**: Detecção automática de HTTP/HTTPS
+- ✅ **Professional Grade**: Relatórios executivos e técnicos
+- ✅ **Fast Results**: Auditoria completa em segundos
+- ✅ **Enterprise Ready**: API REST para integração empresarial
 
-### Debug Mode
-When running in development mode (`python app.py`), debug PIN is displayed in console for troubleshooting. If you encounter issues, please include the debug information when reaching out for support.
+## 📈 Roadmap
 
-### Report Generation
-The scanner automatically generates multiple report formats:
-- **PDF Reports**: Professional formatted security assessments
-- **JSON Data**: Structured data for integrations
-- **Text Reports**: Human-readable analysis with professional insights
+- [ ] Autenticação JWT
+- [ ] Dashboard web interativo  
+- [ ] Integração com mais APIs de performance
+- [ ] Módulos de segurança adicionais
+- [ ] Suporte para testes automatizados
+- [ ] Integração com CI/CD avançada
 
-## License
+## 🤝 Contribuição
 
-MIT License - Professional security scanner for educational and authorized testing only.
+Este é um projeto em desenvolvimento ativo. Para contribuições:
+
+1. Fork o projeto
+2. Crie uma branch para sua feature
+3. Commit suas mudanças
+4. Push para a branch
+5. Abra um Pull Request
+
+## 📜 Licença
+
+MIT License - Scanner profissional para uso educacional e testes autorizados.
+
+## ⚠️ Aviso Legal
+
+**Use apenas em sites que você possui ou tem permissão explícita para testar.**
 
 ---
 
-**Use only on websites you own or have explicit permission to test.**
+**Desenvolvido por**: [Diego Fonte](https://diegofontedev.com.br) - Desenvolvedor Full Stack, Consultor em IA e Cibersegurança  
+**Parceria**: [ZowTi](https://www.zowti.com)
