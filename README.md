@@ -15,7 +15,7 @@ Auditoria completa de segurança, performance, SEO e web patterns para sites e a
 
 ## 📸 Demonstração
 
-![ZowTiCheck Demo](ss/Gravando-2025-10-07-140124.gif)
+![ZowTiCheck Demo](demo/demo.gif)
 
 *Auditoria quádrupla em ação: segurança + performance + SEO + web patterns*
 
