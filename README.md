@@ -1,176 +1,175 @@
-# 🔒 ZowTiCheck - Professional Security & Performance Scanner
+# ZowTiCheck - Professional Security & Performance Scanner
 
-Auditoria completa de segurança, performance, SEO e web patterns para sites e aplicações web.
+Comprehensive security, performance, SEO and web patterns audit for websites and web applications.
 
-## 🚀 Principais Recursos
+[![Python](https://img.shields.io/badge/Python-3.8+-blue?logo=python&logoColor=white)](https://python.org)
+[![Flask](https://img.shields.io/badge/Flask-2.x-green?logo=flask&logoColor=white)](https://flask.palletsprojects.com)
+[![Security](https://img.shields.io/badge/Security-Scanner-red?logo=shield&logoColor=white)](https://github.com/Diego-Cruz-github/ZowTiScan)
+[![API](https://img.shields.io/badge/API-REST-purple?logo=fastapi&logoColor=white)](https://github.com/Diego-Cruz-github/ZowTiScan)
 
-- **12+ Módulos de Segurança**: XSS, CSRF, SQL/NoSQL Injection, Headers, Authentication, Access Control
-- **Performance Analysis**: Core Web Vitals desktop/mobile via Google PageSpeed API
-- **SEO Optimization**: Meta tags, estrutura HTML e otimizações
-- **Web Patterns**: Análise de padrões de desenvolvimento web
-- **REST API**: Integração completa via endpoints JSON
-- **Relatórios Profissionais**: PDF executivo, técnico e JSON
-- **Auto-detect HTTP/HTTPS**: Detecção automática de protocolo
-- **CLI + Library**: Uso via linha de comando ou como biblioteca Python
+## Core Features
 
-## 📸 Demonstração
+**Multi-Domain Security Analysis**
+- Advanced vulnerability detection across 12+ security modules
+- XSS, CSRF, SQL/NoSQL injection identification
+- HTTP security headers validation and authentication analysis
+- Access control verification and information disclosure detection
+
+**Performance & SEO Integration**
+- Core Web Vitals analysis for desktop and mobile via Google PageSpeed API
+- SEO optimization recommendations with meta tags and HTML structure analysis
+- Web development patterns assessment
+- Professional-grade reporting in PDF, JSON and text formats
+
+**Enterprise Architecture**
+- REST API with comprehensive JSON endpoints
+- CLI interface and Python library integration
+- Auto-detection of HTTP/HTTPS protocols
+- Multi-format output for CI/CD pipeline integration
+
+## Demonstration
 
 ![ZowTiCheck Demo](demo/demo.gif)
 
-*Auditoria quádrupla em ação: segurança + performance + SEO + web patterns*
+*Quadruple audit in action: security + performance + SEO + web patterns*
 
-**URL de demonstração**: testphp.vulnweb.com - Site de testes da Acunetix com vulnerabilidades intencionais (SQL Injection, XSS, falhas de configuração HTTP) para demonstrar a eficácia do scanner
+**Demo target**: testphp.vulnweb.com - Acunetix test site with intentional vulnerabilities (SQL Injection, XSS, HTTP configuration flaws) demonstrating scanner effectiveness
 
-## 💻 Stack Tecnológica
+## Technical Stack
 
-**Backend:**
-- Python 3.8+ com Flask
-- requests, BeautifulSoup4, pydantic
-- Google PageSpeed Insights API
-- reportlab para relatórios PDF
+**Backend Architecture**
+- Python 3.8+ with Flask framework
+- Advanced HTTP client libraries (requests, BeautifulSoup4)
+- Data validation with Pydantic models
+- Google PageSpeed Insights API integration
+- Professional PDF report generation
 
-**Frontend:**
-- HTML5, CSS3, JavaScript vanilla
-- Interface responsiva e moderna
+**Frontend Interface**
+- Modern HTML5, CSS3, vanilla JavaScript
+- Responsive design architecture
+- Real-time audit progress indicators
 
-**APIs:**
-- REST API completa
-- Google PageSpeed Insights integration
-- Auto-detect HTTP/HTTPS
+**API Layer**
+- RESTful API with comprehensive endpoints
+- External service integrations (Google PageSpeed)
+- Automatic protocol detection and validation
 
-## 🛠️ Instalação
+## Installation
 
 ```bash
-# Clone o repositório
-git clone https://github.com/seu-usuario/ZowTiCheck.git
-cd ZowTiCheck
+# Clone repository
+git clone https://github.com/Diego-Cruz-github/ZowTiScan.git
+cd ZowTiScan
 
-# Instale as dependências
+# Install dependencies
 pip install -r requirements.txt
 
-# Configure as variáveis de ambiente (opcional)
+# Configure environment variables (optional)
 cp .env.example .env
 ```
 
-## 📖 Uso
+## Usage
 
-### Linha de Comando
+### Command Line Interface
 ```bash
-# Auditoria completa (segurança + performance + SEO + web patterns)
-python scanner.py https://exemplo.com --audit
+# Complete audit (security + performance + SEO + web patterns)
+python scanner.py https://example.com --audit
 
-# Apenas segurança
-python scanner.py https://exemplo.com --security
+# Security-only scan
+python scanner.py https://example.com --security
 
-# Formato JSON
-python scanner.py https://exemplo.com --audit --format json
+# JSON output format
+python scanner.py https://example.com --audit --format json
 ```
 
-### Como Biblioteca Python
+### Python Library
 ```python
 from scanner import SecurityScanner
 
 scanner = SecurityScanner()
-result = scanner.audit_complete('https://exemplo.com')
+result = scanner.audit_complete('https://example.com')
 print(f"Security: {result['security_score']}/100")
 print(f"Performance: {result['performance_score']}/100")
 ```
 
-### API REST
+### REST API
 ```bash
-# Iniciar servidor
+# Start server
 python app.py
 
-# Auditoria completa
+# Complete audit
 curl -X POST http://localhost:5000/api/audit \
   -H "Content-Type: application/json" \
-  -d '{"url": "https://exemplo.com"}'
+  -d '{"url": "https://example.com"}'
 ```
 
-## 📊 Exemplo de Saída
+## Output Example
 
 ```
-ZowTiCheck - Auditing https://exemplo.com
+ZowTiCheck - Auditing https://example.com
 ============================================================
-✅ Security Score: 67/100 (MEDIUM RISK)
-⚡ Performance Score: 89/100 (GOOD)
-🔍 SEO Score: 82/100 (GOOD)
-🌐 Web Patterns Score: 91/100 (EXCELLENT)
+Security Score: 67/100 (MEDIUM RISK)
+Performance Score: 89/100 (GOOD)
+SEO Score: 82/100 (GOOD)
+Web Patterns Score: 91/100 (EXCELLENT)
 
-⚠️ Vulnerabilities found: 5 issues
-📋 Quadruple audit: 3.8 seconds
+Vulnerabilities found: 5 issues
+Quadruple audit: 3.8 seconds
 
 CRITICAL:
-🔍 Missing CSRF Protection - POST form vulnerability
-⚡ MEDIUM: Missing meta description (SEO impact)
+Missing CSRF Protection - POST form vulnerability
+MEDIUM: Missing meta description (SEO impact)
 ```
 
-## 🔧 Funcionalidades Principais
+## Security Modules
 
-### Módulos de Segurança (12+)
-- **Web Application Security**: Detecção de vulnerabilidades comuns
-- **Session Security**: Validação de segurança de sessões  
-- **Injection Vulnerabilities**: Sistema de detecção avançado
-- **HTTP Security**: Análise de configurações de segurança
-- **Information Security**: Detecção de exposição de dados
-- **Resource Validation**: Verificação de recursos e links
-- **Access Control**: Validação de controles de acesso
-- **File Security**: Verificação de segurança em uploads
+**Advanced Vulnerability Detection**
+- Web application security assessment with comprehensive OWASP coverage
+- Session management and authentication security validation
+- Advanced injection vulnerability detection (SQL, NoSQL, XSS, CSRF)
+- HTTP security headers analysis and configuration assessment
+- Information disclosure and data exposure identification
+- Resource validation and access control verification
 
-### Performance + SEO + Web Patterns
-- **Core Web Vitals**: Desktop e mobile via Google PageSpeed
-- **SEO Analysis**: Meta tags e estrutura HTML
-- **Page Speed Insights**: Integração completa com Google API
-- **Web Patterns**: Padrões de desenvolvimento web modernos
+## Architecture Overview
 
-### Enterprise Integration
-- **API REST**: Endpoints para auditoria automática
-- **CI/CD Integration**: Integração com pipelines de desenvolvimento
-- **Executive Reports**: Relatórios profissionais automatizados
-- **Multi-format Output**: PDF, JSON, texto
+**Modular Design**
+- 12+ specialized security modules with independent execution
+- Performance analysis engine with Google PageSpeed API integration
+- SEO optimization scanner with technical recommendations
+- Web development patterns assessment and best practices validation
 
-## 🌟 Diferenciais
+**Professional Reporting**
+- Executive summary reports with risk scoring and prioritization
+- Technical detailed reports with remediation recommendations
+- Multi-format output (PDF, JSON, plain text) for various stakeholders
+- CI/CD pipeline integration with automated reporting
 
-- ✅ **Auditoria 4 em 1**: Segurança + Performance + SEO + Web Patterns
-- ✅ **Desktop + Mobile**: Análise separada para diferentes dispositivos
-- ✅ **Auto-detect**: Detecção automática de HTTP/HTTPS
-- ✅ **Professional Grade**: Relatórios executivos e técnicos
-- ✅ **Fast Results**: Auditoria completa em segundos
-- ✅ **Enterprise Ready**: API REST para integração empresarial
+## Technical Differentiators
 
-## 📈 Roadmap
+- **Quadruple Analysis**: Security + Performance + SEO + Web Patterns in single scan
+- **Multi-Device Assessment**: Separate desktop and mobile performance analysis
+- **Protocol Intelligence**: Automatic HTTP/HTTPS detection and testing
+- **Enterprise Integration**: REST API architecture for automated security workflows
+- **Rapid Execution**: Complete audit cycles in under 5 seconds
+- **Scalable Architecture**: Designed for high-volume enterprise environments
 
-- [ ] Autenticação JWT
-- [ ] Dashboard web interativo  
-- [ ] Integração com mais APIs de performance
-- [ ] Módulos de segurança adicionais
-- [ ] Suporte para testes automatizados
-- [ ] Integração com CI/CD avançada
+## License
 
-## 🤝 Contribuição
+MIT License - Professional scanner for educational and authorized testing purposes.
 
-Este é um projeto em desenvolvimento ativo. Para contribuições:
+## Legal Notice
 
-1. Fork o projeto
-2. Crie uma branch para sua feature
-3. Commit suas mudanças
-4. Push para a branch
-5. Abra um Pull Request
-
-## 📜 Licença
-
-MIT License - Scanner profissional para uso educacional e testes autorizados.
-
-## ⚠️ Aviso Legal
-
-**Use apenas em sites que você possui ou tem permissão explícita para testar.**
+**Use only on websites you own or have explicit permission to test.**
 
 ---
 
-## 👨‍💻 Autor
-**Diego Fonte** - Desenvolvedor Full Stack | Consultor de Cyber Segurança e IA
+**Partnership & Development**
 
-🌐 **Website**: [www.diegofontedev.com.br](https://www.diegofontedev.com.br) | [English](https://www.diegofontedev.com.br/index-en.html) | [Español](https://www.diegofontedev.com.br/index-es.html)  
-📧 **Email**: contato@diegofontedev.com.br
+Developed in partnership with [ZowTi](https://zowti.com/) - Cybersecurity & Compliance Solutions  
+[English](https://zowti.com/en/index.html) | [Español](https://zowti.com/es/index.html)
 
-🤝 **Em Parceria com**: [ZowTi](https://www.zowti.com) | [English](https://www.zowti.com/en/index.html) | [Español](https://www.zowti.com/es/index.html)
+**Diego Fonte**  
+Full Stack Developer | Cybersecurity & AI Focused  
+[Portfolio PT](https://diegofontedev.com.br/) | [EN](https://diegofontedev.com.br/index-en.html) | [ES](https://diegofontedev.com.br/index-es.html)  
+Contact: contato@diegofontedev.com.br
